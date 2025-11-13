@@ -256,16 +256,13 @@ async function diagnosticarRLS() {
     }
 }
 
-// Exportar para usar en otros archivos
-window.supabase = supabase;
-window.ClientesService = ClientesService;
-window.PagosService = PagosService;
-window.testConnection = testConnection;
-window.diagnosticarRLS = diagnosticarRLS;
+// EXPORTAR CORRECTAMENTE - ESTO ES LO QUE FALTABA
+export { 
+    ClientesService, 
+    testConnection, 
+    diagnosticarRLS,
+    PagosService,
+    supabase 
+};
 
-console.log('📦 Supabase.js cargado correctamente');
-
-// Ejecutar diagnóstico al cargar
-setTimeout(() => {
-    diagnosticarRLS();
-}, 1000);
+console.log('📦 Supabase.js cargado y exportado correctamente');
