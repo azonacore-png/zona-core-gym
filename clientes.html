@@ -583,11 +583,17 @@
             });
         }
 
-        // Cargar clientes desde Supabase - VERSIÓN CORREGIDA
+        // Cargar clientes desde Supabase - CON MANEJO RLS
         async function loadClients() {
             try {
                 console.log('🔄 Cargando clientes...');
                 showLoadingState();
+                
+                // Primero diagnosticar RLS
+                const rlsOk = await diagnosticarRLS();
+                if (!rlsOk) {
+                    throw new Error('Problema de configuración RLS. Verifica las políticas en Supabase.');
+                }
                 
                 const clients = await ClientesService.obtenerClientes();
                 console.log('📥 Clientes recibidos:', clients);
@@ -597,9 +603,17 @@
                 
             } catch (error) {
                 console.error('❌ Error cargando clientes:', error);
-                showNotification('Error al cargar los clientes: ' + error.message, 'error');
                 
-                // Mostrar estado vacío si hay error
+                let errorMessage = error.message;
+                
+                // Mensajes específicos para RLS
+                if (error.message.includes('RLS_BLOCKED') || error.message.includes('row-level security')) {
+                    errorMessage = 'Error de permisos: Las políticas de seguridad están bloqueando el acceso. Configura las políticas RLS en Supabase.';
+                }
+                
+                showNotification('Error al cargar los clientes: ' + errorMessage, 'error');
+                
+                // Mostrar estado de error específico
                 const grid = document.getElementById('clientsGrid');
                 const loadingState = document.getElementById('loadingState');
                 const emptyState = document.getElementById('emptyState');
@@ -607,14 +621,35 @@
                 loadingState.classList.add('hidden');
                 grid.classList.add('hidden');
                 emptyState.classList.remove('hidden');
-                emptyState.innerHTML = `
-                    <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-                    <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
-                    <p class="text-gray-500 mb-4">${error.message}</p>
-                    <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
-                        <i class="fas fa-redo mr-2"></i>Reintentar
-                    </button>
-                `;
+                
+                if (error.message.includes('RLS')) {
+                    emptyState.innerHTML = `
+                        <i class="fas fa-shield-alt text-4xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Configuración de Seguridad Requerida</h3>
+                        <p class="text-gray-500 mb-4">Necesitas configurar las políticas RLS en Supabase.</p>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 text-sm">
+                            <p class="font-medium mb-2">Pasos para solucionar:</p>
+                            <ol class="list-decimal list-inside space-y-1">
+                                <li>Ve a tu proyecto de Supabase</li>
+                                <li>Abre el SQL Editor</li>
+                                <li>Ejecuta el código SQL de políticas RLS</li>
+                                <li>Recarga esta página</li>
+                            </ol>
+                        </div>
+                        <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-redo mr-2"></i>Reintentar
+                        </button>
+                    `;
+                } else {
+                    emptyState.innerHTML = `
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
+                        <p class="text-gray-500 mb-4">${errorMessage}</p>
+                        <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-redo mr-2"></i>Reintentar
+                        </button>
+                    `;
+                }
             }
         }
 
