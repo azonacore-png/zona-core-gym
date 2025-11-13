@@ -20,22 +20,23 @@ async function testConnection() {
     }
 }
 
-// Funciones para clientes - CORREGIDAS
+// Funciones para clientes - COMPATIBLE CON LA ESTRUCTURA
 const ClientesService = {
     // Obtener todos los clientes
     async obtenerClientes() {
         try {
+            console.log('🔄 Solicitando clientes desde Supabase...')
             const { data, error } = await supabase
                 .from('clientes')
                 .select('*')
                 .order('created_at', { ascending: false })
             
             if (error) {
-                console.error('❌ Error obteniendo clientes:', error)
-                throw new Error(`Error al cargar clientes: ${error.message}`)
+                console.error('❌ Error Supabase:', error)
+                throw new Error(`Error de base de datos: ${error.message}`)
             }
             
-            console.log('✅ Clientes cargados:', data?.length || 0)
+            console.log(`✅ ${data?.length || 0} clientes cargados correctamente`)
             return data || []
         } catch (error) {
             console.error('❌ Error en obtenerClientes:', error)
@@ -43,25 +44,28 @@ const ClientesService = {
         }
     },
 
-    // Crear nuevo cliente
+    // Crear nuevo cliente - COMPATIBLE CON LA ESTRUCTURA
     async crearCliente(clienteData) {
         try {
-            console.log('🆕 Creando cliente:', clienteData)
+            console.log('🆕 Iniciando creación de cliente...')
             
             // Validar campos requeridos
-            if (!clienteData.nombre || !clienteData.email) {
-                throw new Error('Nombre y email son campos requeridos')
+            if (!clienteData.nombre?.trim()) {
+                throw new Error('El nombre es requerido')
+            }
+            if (!clienteData.email?.trim()) {
+                throw new Error('El email es requerido')
             }
 
-            // Limpiar y formatear datos
-            const datosLimpios = {
+            // Preparar datos EXACTAMENTE como la tabla los espera
+            const datosParaSupabase = {
                 nombre: clienteData.nombre.trim(),
                 email: clienteData.email.trim().toLowerCase(),
                 telefono: clienteData.telefono?.trim() || null,
                 fecha_nacimiento: clienteData.fecha_nacimiento || null,
                 genero: clienteData.genero || null,
                 ocupacion: clienteData.ocupacion?.trim() || null,
-                experiencia_ejercicio: Boolean(clienteData.experiencia_ejercicio),
+                experiencia_ejercicio: clienteData.experiencia_ejercicio === true || clienteData.experiencia_ejercicio === 'true',
                 contacto_emergencia: clienteData.contacto_emergencia?.trim() || null,
                 telefono_emergencia: clienteData.telefono_emergencia?.trim() || null,
                 alergias: clienteData.alergias?.trim() || null,
@@ -71,22 +75,27 @@ const ClientesService = {
                 estado: clienteData.estado || 'activa',
                 fecha_ingreso: clienteData.fecha_ingreso || new Date().toISOString().split('T')[0],
                 proximo_pago: clienteData.proximo_pago || this.calcularProximoPago(clienteData.membresia_tipo),
-                observaciones: clienteData.observaciones?.trim() || null
+                observaciones: clienteData.observaciones?.trim() || null,
+                activo: true // Siempre true para nuevos clientes
             }
 
-            console.log('📤 Enviando a Supabase:', datosLimpios)
+            console.log('📤 Enviando a Supabase:', datosParaSupabase)
 
             const { data, error } = await supabase
                 .from('clientes')
-                .insert([datosLimpios])
+                .insert([datosParaSupabase])
                 .select()
             
             if (error) {
-                console.error('❌ Error Supabase:', error)
+                console.error('❌ Error Supabase al crear:', error)
                 throw new Error(`Error al crear cliente: ${error.message}`)
             }
 
-            console.log('✅ Cliente creado:', data[0])
+            if (!data || data.length === 0) {
+                throw new Error('No se recibió respuesta del servidor')
+            }
+
+            console.log('✅ Cliente creado exitosamente:', data[0])
             return data[0]
 
         } catch (error) {
@@ -98,36 +107,33 @@ const ClientesService = {
     // Actualizar cliente
     async actualizarCliente(id, updates) {
         try {
-            console.log('✏️ Actualizando cliente:', id, updates)
-
-            // Limpiar y formatear datos
-            const datosLimpios = { ...updates }
+            console.log('✏️ Actualizando cliente ID:', id)
             
-            if (datosLimpios.experiencia_ejercicio !== undefined) {
-                datosLimpios.experiencia_ejercicio = Boolean(datosLimpios.experiencia_ejercicio)
+            // Preparar datos para actualización
+            const datosActualizacion = { ...updates }
+            
+            // Convertir experiencia_ejercicio a booleano si es necesario
+            if (datosActualizacion.experiencia_ejercicio !== undefined) {
+                datosActualizacion.experiencia_ejercicio = 
+                    datosActualizacion.experiencia_ejercicio === true || 
+                    datosActualizacion.experiencia_ejercicio === 'true'
             }
 
-            // Limpiar campos vacíos
-            Object.keys(datosLimpios).forEach(key => {
-                if (datosLimpios[key] === '' || datosLimpios[key] === undefined) {
-                    datosLimpios[key] = null
-                }
-                if (typeof datosLimpios[key] === 'string') {
-                    datosLimpios[key] = datosLimpios[key].trim()
-                }
-            })
-
-            console.log('📤 Actualizando en Supabase:', datosLimpios)
+            console.log('📤 Actualizando en Supabase:', datosActualizacion)
 
             const { data, error } = await supabase
                 .from('clientes')
-                .update(datosLimpios)
+                .update(datosActualizacion)
                 .eq('id', id)
                 .select()
             
             if (error) {
-                console.error('❌ Error Supabase:', error)
+                console.error('❌ Error Supabase al actualizar:', error)
                 throw new Error(`Error al actualizar cliente: ${error.message}`)
+            }
+
+            if (!data || data.length === 0) {
+                throw new Error('Cliente no encontrado')
             }
 
             console.log('✅ Cliente actualizado:', data[0])
@@ -142,7 +148,7 @@ const ClientesService = {
     // Eliminar cliente
     async eliminarCliente(id) {
         try {
-            console.log('🗑️ Eliminando cliente:', id)
+            console.log('🗑️ Eliminando cliente ID:', id)
 
             const { error } = await supabase
                 .from('clientes')
@@ -150,11 +156,11 @@ const ClientesService = {
                 .eq('id', id)
             
             if (error) {
-                console.error('❌ Error Supabase:', error)
+                console.error('❌ Error Supabase al eliminar:', error)
                 throw new Error(`Error al eliminar cliente: ${error.message}`)
             }
 
-            console.log('✅ Cliente eliminado')
+            console.log('✅ Cliente eliminado exitosamente')
             return true
 
         } catch (error) {
@@ -199,26 +205,10 @@ const PagosService = {
     }
 }
 
-// Configuración inicial de políticas (ejecutar una vez)
-async function configurarPoliticas() {
-    try {
-        // Verificar si las políticas existen
-        const { error } = await supabase.from('clientes').select('*').limit(1)
-        
-        if (error && error.code === '42501') {
-            console.warn('⚠️ Las políticas RLS pueden estar bloqueando el acceso')
-            console.warn('💡 Ve a Supabase → Authentication → Policies y asegúrate de tener políticas que permitan todas las operaciones')
-        }
-    } catch (error) {
-        console.error('❌ Error verificando políticas:', error)
-    }
-}
-
-// Ejecutar configuración al cargar
-configurarPoliticas()
-
 // Exportar para usar en otros archivos
 window.supabase = supabase
 window.ClientesService = ClientesService
 window.PagosService = PagosService
 window.testConnection = testConnection
+
+console.log('📦 Supabase.js cargado correctamente')
