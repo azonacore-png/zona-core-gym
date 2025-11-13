@@ -492,56 +492,56 @@
 
     <!-- Incluir el archivo supabase.js externo -->
     <script type="module">
-    // Importar desde el archivo externo supabase.js
-    import { ClientesService, testConnection, diagnosticarRLS } from './supabase.js';
-    
-    // Exportar al scope global para las funciones del HTML
-    window.ClientesService = ClientesService;
-    window.testConnection = testConnection;
-    window.diagnosticarRLS = diagnosticarRLS;
-    
-    // Variables globales
-    let allClients = [];
-    let currentClientId = null;
-    let isEditing = false;
+        // Importar desde el archivo externo supabase.js
+        import { ClientesService, testConnection, diagnosticarRLS } from './supabase.js';
+        
+        // Exportar al scope global para las funciones del HTML
+        window.ClientesService = ClientesService;
+        window.testConnection = testConnection;
+        window.diagnosticarRLS = diagnosticarRLS;
+        
+        // Variables globales
+        let allClients = [];
+        let currentClientId = null;
+        let isEditing = false;
 
-    // Cargar clientes desde Supabase - VERSIÓN SIMPLIFICADA
-    async function loadClients() {
-        try {
-            console.log('🔄 Cargando clientes...');
-            showLoadingState();
-            
-            const clients = await ClientesService.obtenerClientes();
-            console.log('📥 Clientes recibidos:', clients);
-            
-            allClients = clients;
-            renderClients(clients);
-            
-        } catch (error) {
-            console.error('❌ Error cargando clientes:', error);
-            
-            let errorMessage = error.message;
-            
-            showNotification('Error al cargar los clientes: ' + errorMessage, 'error');
-            
-            // Mostrar estado de error
-            const grid = document.getElementById('clientsGrid');
-            const loadingState = document.getElementById('loadingState');
-            const emptyState = document.getElementById('emptyState');
-            
-            loadingState.classList.add('hidden');
-            grid.classList.add('hidden');
-            emptyState.classList.remove('hidden');
-            emptyState.innerHTML = `
-                <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
-                <p class="text-gray-500 mb-4">${errorMessage}</p>
-                <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
-                    <i class="fas fa-redo mr-2"></i>Reintentar
-                </button>
-            `;
+        // Cargar clientes desde Supabase - VERSIÓN SIMPLIFICADA
+        async function loadClients() {
+            try {
+                console.log('🔄 Cargando clientes...');
+                showLoadingState();
+                
+                const clients = await ClientesService.obtenerClientes();
+                console.log('📥 Clientes recibidos:', clients);
+                
+                allClients = clients;
+                renderClients(clients);
+                
+            } catch (error) {
+                console.error('❌ Error cargando clientes:', error);
+                
+                let errorMessage = error.message;
+                
+                showNotification('Error al cargar los clientes: ' + errorMessage, 'error');
+                
+                // Mostrar estado de error
+                const grid = document.getElementById('clientsGrid');
+                const loadingState = document.getElementById('loadingState');
+                const emptyState = document.getElementById('emptyState');
+                
+                loadingState.classList.add('hidden');
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.innerHTML = `
+                    <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
+                    <p class="text-gray-500 mb-4">${errorMessage}</p>
+                    <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-redo mr-2"></i>Reintentar
+                    </button>
+                `;
+            }
         }
-    }
 
     // FUNCIÓN FALTANTE: Renderizar clientes en la grid
     function renderClients(clients) {
