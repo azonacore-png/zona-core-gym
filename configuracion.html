@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - ZONA CORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #2A5B8A;
+            --neutral-gray: #5A5A5A;
+            --accent-orange: #FF7A3C;
+            --light-gray: #F8F9FA;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-blue) 0%, #1e3a5f 100%);
+            backdrop-filter: blur(10px);
+        }
+        
+        .main-content {
+            background: var(--light-gray);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #ff6b2b 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 122, 60, 0.3);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 122, 60, 0.2);
+            border-left: 4px solid var(--accent-orange);
+        }
+        
+        .config-section {
+            transition: all 0.3s ease;
+        }
+        
+        .config-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--accent-orange);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<script src="js/backup.js"></script>
+
+<body>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 text-white p-6 flex flex-col">
+            <div class="mb-8">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dumbbell text-2xl" style="color: var(--primary-blue);"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">ZONA CORE</h1>
+                        <p class="text-sm opacity-80">Admin Panel</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 space-y-2">
+                <a href="index.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="pagos.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pagos</span>
+                </a>
+                <a href="clases.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Clases</span>
+                </a>
+                <a href="progreso.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progreso</span>
+                </a>
+                <a href="ejercicios.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-book"></i>
+                    <span>Biblioteca</span>
+                </a>
+                <a href="reportes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="#" class="nav-item active flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+            
+            <div class="mt-auto">
+                <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Administrador</p>
+                            <p class="text-xs opacity-80">ZONA CORE</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Configuración del Sistema</h2>
+                        <p class="text-gray-600">Administra la configuración de ZONA CORE</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="saveAllSettings()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-save mr-2"></i>Guardar Todo
+                        </button>
+                        <div class="relative">
+                            <button class="p-2 text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <!-- General Settings -->
+                    <div class="config-section card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-cog text-blue-600 mr-3"></i>
+                            Configuración General
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Gimnasio</label>
+                                <input type="text" value="ZONA CORE" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email de Contacto</label>
+                                <input type="email" value="info@zonacore.cl" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                                <input type="tel" value="+56 9 1234 5678" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
+                                <input type="text" value="Av. Principal 123, Santiago" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Membership Pricing -->
+                    <div class="config-section card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-dollar-sign text-green-600 mr-3"></i>
+                            Precios de Membresías
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-3">Mensual</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Precio</label>
+                                        <input type="number" value="80" step="0.01" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Clases incluidas</label>
+                                        <input type="number" value="8" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-3">Trimestral</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Precio</label>
+                                        <input type="number" value="220" step="0.01" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Clases incluidas</label>
+                                        <input type="number" value="24" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-3">Semestral</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Precio</label>
+                                        <input type="number" value="420" step="0.01" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Clases incluidas</label>
+                                        <input type="number" value="48" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-3">Anual</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Precio</label>
+                                        <input type="number" value="800" step="0.01" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Clases incluidas</label>
+                                        <input type="number" value="96" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Class Settings -->
+                    <div class="config-section card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-calendar-alt text-purple-600 mr-3"></i>
+                            Configuración de Clases
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Capacidad Máxima por Clase</label>
+                                <input type="number" value="8" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Duración de Clase (minutos)</label>
+                                <input type="number" value="60" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo de Cancelación (horas)</label>
+                                <input type="number" value="3" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Días de Anticipación para Reserva</label>
+                                <input type="number" value="7" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Methods -->
+                    <div class="config-section card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-credit-card text-orange-600 mr-3"></i>
+                            Métodos de Pago
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
+                                    <span class="font-medium">Efectivo</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-credit-card text-blue-600 text-xl"></i>
+                                    <span class="font-medium">Tarjeta de Crédito/Débito</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-exchange-alt text-purple-600 text-xl"></i>
+                                    <span class="font-medium">Transferencia Bancaria</span>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="config-section card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-bell text-red-600 mr-3"></i>
+                            Notificaciones
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="font-medium text-gray-800">Recordatorios de Pago</span>
+                                    <p class="text-sm text-gray-600">Enviar recordatorios 3 días antes del vencimiento</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="font-medium text-gray-800">Confirmaciones de Reserva</span>
+                                    <p class="text-sm text-gray-600">Enviar confirmación cuando se reserva una clase</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="font-medium text-gray-800">Felicitaciones de Cumpleaños</span>
+                                    <p class="text-sm text-gray-600">Enviar mensaje especial en el cumpleaños del cliente</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="font-medium text-gray-800">Recordatorios de Clase</span>
+                                    <p class="text-sm text-gray-600">Enviar recordatorio 2 horas antes de la clase</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Backup & Security -->
+                    <div class="config-section card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-shield-alt text-green-600 mr-3"></i>
+                            Seguridad y Respaldo
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-800 mb-3">Respaldo de Datos</h4>
+                                <p class="text-sm text-gray-600 mb-4">Último respaldo: 12/11/2024 15:30</p>
+                                <button onclick="backupData()" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                                    <i class="fas fa-download mr-2"></i>Respaldar Ahora
+                                </button>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-800 mb-3">Seguridad</h4>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm">Sesiones activas</span>
+                                        <span class="text-sm font-medium">2</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm">Último acceso</span>
+                                        <span class="text-sm font-medium">Hoy 14:30</span>
+                                    </div>
+                                </div>
+                                <button onclick="changePassword()" class="mt-3 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200">
+                                    <i class="fas fa-key mr-2"></i>Cambiar Contraseña
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+<!-- Sección Backup -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">🔄 Sistema de Backup</h2>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+        <!-- Exportar -->
+        <div class="border-2 border-dashed border-green-200 rounded-lg p-6 text-center bg-green-50">
+            <div class="text-4xl mb-3">📥</div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Exportar Backup</h3>
+            <p class="text-sm text-gray-600 mb-4">Descarga copia de seguridad de todos los datos</p>
+            <button 
+                onclick="backupManager.exportarBackup()" 
+                class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 w-full"
+            >
+                Exportar Backup
+            </button>
+        </div>
+
+        <!-- Importar -->
+        <div class="border-2 border-dashed border-blue-200 rounded-lg p-6 text-center bg-blue-50">
+            <div class="text-4xl mb-3">📤</div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Importar Backup</h3>
+            <p class="text-sm text-gray-600 mb-4">Restaura datos desde archivo de backup</p>
+            <label class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 w-full inline-block cursor-pointer">
+                Seleccionar Archivo
+                <input 
+                    type="file" 
+                    accept=".json" 
+                    onchange="backupManager.importarBackup(event)" 
+                    class="hidden"
+                >
+            </label>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-xl font-bold text-blue-600" id="contador-clientes">0</div>
+            <div class="text-sm text-gray-600">Clientes</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-xl font-bold text-green-600" id="contador-pagos">0</div>
+            <div class="text-sm text-gray-600">Pagos</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-xl font-bold text-purple-600" id="contador-clases">0</div>
+            <div class="text-sm text-gray-600">Clases</div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-lg">
+            <div class="text-xl font-bold text-orange-600" id="contador-ejercicios">0</div>
+            <div class="text-sm text-gray-600">Ejercicios</div>
+        </div>
+    </div>
+</div>
+    
+    <script>
+        // Configuration functions
+        function saveAllSettings() {
+            // Collect all form data
+            const settings = {
+                general: {
+                    gymName: document.querySelector('input[value="ZONA CORE"]').value,
+                    email: document.querySelector('input[value="info@zonacore.cl"]').value,
+                    phone: document.querySelector('input[value="+56 9 1234 5678"]').value,
+                    address: document.querySelector('input[value="Av. Principal 123, Santiago"]').value
+                },
+                memberships: {
+                    monthly: document.querySelector('input[value="80"]').value,
+                    quarterly: document.querySelector('input[value="220"]').value,
+                    semester: document.querySelector('input[value="420"]').value,
+                    annual: document.querySelector('input[value="800"]').value
+                },
+                classes: {
+                    maxCapacity: document.querySelector('input[value="8"]').value,
+                    duration: document.querySelector('input[value="60"]').value,
+                    cancelTime: document.querySelector('input[value="3"]').value,
+                    advanceBooking: document.querySelector('input[value="7"]').value
+                }
+            };
+            
+            console.log('Saving settings:', settings);
+            alert('Configuración guardada exitosamente!');
+        }
+        
+        function backupData() {
+            alert('Iniciando respaldo de datos...\n\nFuncionalidad en desarrollo');
+        }
+        
+        function changePassword() {
+            const newPassword = prompt('Ingresa tu nueva contraseña:');
+            if (newPassword && newPassword.length >= 6) {
+                alert('Contraseña actualizada exitosamente!');
+            } else if (newPassword) {
+                alert('La contraseña debe tener al menos 6 caracteres');
+            }
+        }
+        
+        // Toggle switches functionality
+        document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const feature = this.closest('.flex').querySelector('.font-medium').textContent;
+                console.log(`${feature}: ${this.checked ? 'Activado' : 'Desactivado'}`);
+            });
+        });
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate elements
+            anime({
+                targets: '.fade-in',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(150),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    window.location.href = href;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

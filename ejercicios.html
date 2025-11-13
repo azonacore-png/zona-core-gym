@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - ZONA CORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #2A5B8A;
+            --neutral-gray: #5A5A5A;
+            --accent-orange: #FF7A3C;
+            --light-gray: #F8F9FA;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-blue) 0%, #1e3a5f 100%);
+            backdrop-filter: blur(10px);
+        }
+        
+        .main-content {
+            background: var(--light-gray);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #ff6b2b 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 122, 60, 0.3);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 122, 60, 0.2);
+            border-left: 4px solid var(--accent-orange);
+        }
+        
+        .exercise-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .category-filter {
+            transition: all 0.3s ease;
+        }
+        
+        .category-filter.active {
+            background: var(--accent-orange);
+            color: white;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<script src="js/backup.js"></script>
+
+<body>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 text-white p-6 flex flex-col">
+            <div class="mb-8">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dumbbell text-2xl" style="color: var(--primary-blue);"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">ZONA CORE</h1>
+                        <p class="text-sm opacity-80">Admin Panel</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 space-y-2">
+                <a href="index.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="pagos.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pagos</span>
+                </a>
+                <a href="clases.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Clases</span>
+                </a>
+                <a href="progreso.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progreso</span>
+                </a>
+                <a href="#" class="nav-item active flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-book"></i>
+                    <span>Biblioteca</span>
+                </a>
+                <a href="reportes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="configuracion.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+            
+            <div class="mt-auto">
+                <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Administrador</p>
+                            <p class="text-xs opacity-80">ZONA CORE</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Biblioteca de Ejercicios</h2>
+                        <p class="text-gray-600">Catálogo completo de ejercicios para ZONA CORE</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="openExerciseModal()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-plus mr-2"></i>Nuevo Ejercicio
+                        </button>
+                        <div class="relative">
+                            <button class="p-2 text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Category Filters -->
+                <div class="card rounded-xl p-6 mb-6 fade-in">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="text-sm font-medium text-gray-700">Categorías:</span>
+                        <button class="category-filter active px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" data-category="all">
+                            Todos
+                        </button>
+                        <button class="category-filter px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" data-category="glutes">
+                            Glúteos
+                        </button>
+                        <button class="category-filter px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" data-category="quadriceps">
+                            Cuádriceps
+                        </button>
+                        <button class="category-filter px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" data-category="hamstrings">
+                            Isquiosurales
+                        </button>
+                        <button class="category-filter px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" data-category="core">
+                            Core
+                        </button>
+                        <button class="category-filter px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200" data-category="cardio">
+                            Cardio
+                        </button>
+                        <button class="category-filter px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-gray-200" data-category="upper">
+                            Tren Superior
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="card rounded-xl p-4 mb-6 fade-in">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-1">
+                            <input type="text" id="searchExercise" placeholder="Buscar ejercicio..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Todos los niveles</option>
+                            <option value="beginner">Principiante</option>
+                            <option value="intermediate">Intermedio</option>
+                            <option value="advanced">Avanzado</option>
+                        </select>
+                        <button class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-search mr-2"></i>Buscar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Exercise Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 fade-in" id="exercisesGrid">
+                    <!-- Exercise cards will be dynamically generated -->
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Exercise Modal -->
+    <div id="exerciseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Nuevo Ejercicio</h3>
+                <button onclick="closeExerciseModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="exerciseForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Ejercicio *</label>
+                        <input type="text" name="exerciseName" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Ej: Sentadilla">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Categoría *</label>
+                        <select name="category" required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Seleccionar categoría</option>
+                            <option value="glutes">Glúteos</option>
+                            <option value="quadriceps">Cuádriceps</option>
+                            <option value="hamstrings">Isquiosurales</option>
+                            <option value="core">Core</option>
+                            <option value="cardio">Cardio</option>
+                            <option value="upper">Tren Superior</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nivel de Dificultad</label>
+                        <select name="difficulty" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="beginner">Principiante</option>
+                            <option value="intermediate">Intermedio</option>
+                            <option value="advanced">Avanzado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Equipo</label>
+                        <select name="equipment" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="bodyweight">Peso Corporal</option>
+                            <option value="dumbbells">Mancuernas</option>
+                            <option value="barbell">Barra</option>
+                            <option value="machine">Máquina</option>
+                            <option value="resistance">Bandas</option>
+                            <option value="kettlebell">Kettlebell</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                    <textarea name="description" rows="3" required
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Describe el ejercicio, técnica y beneficios..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Instrucciones</label>
+                    <textarea name="instructions" rows="4" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Pasos detallados para realizar el ejercicio..."></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">URL de Imagen</label>
+                        <input type="url" name="imageUrl" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="https://ejemplo.com/imagen.jpg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">URL de Video</label>
+                        <input type="url" name="videoUrl" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="https://youtube.com/ejemplo">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Músculos Principales</label>
+                    <input type="text" name="primaryMuscles" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: Glúteo mayor, Cuádriceps">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Músculos Secundarios</label>
+                    <input type="text" name="secondaryMuscles" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Ej: Core, Isquiosurales">
+                </div>
+                
+                <div class="flex justify-end space-x-4 pt-6">
+                    <button type="button" onclick="closeExerciseModal()" 
+                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-save mr-2"></i>Guardar Ejercicio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Exercise Detail Modal -->
+    <div id="exerciseDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-4xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800" id="detailExerciseName">Detalle del Ejercicio</h3>
+                <button onclick="closeExerciseDetailModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    <img id="detailExerciseImage" src="https://via.placeholder.com/400x300" alt="Exercise" 
+                         class="w-full rounded-lg mb-4">
+                    <div class="flex space-x-2">
+                        <button class="flex-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                            <i class="fas fa-play mr-2"></i>Ver Video
+                        </button>
+                        <button class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200">
+                            <i class="fas fa-edit mr-2"></i>Editar
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Descripción</h4>
+                            <p id="detailDescription" class="text-gray-600">Descripción del ejercicio...</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Instrucciones</h4>
+                            <ol id="detailInstructions" class="text-gray-600 space-y-1">
+                                <li>1. Instrucción 1</li>
+                                <li>2. Instrucción 2</li>
+                                <li>3. Instrucción 3</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">Músculos Principales</h4>
+                                <div id="detailPrimaryMuscles" class="text-gray-600">
+                                    <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-1 mb-1">Glúteo mayor</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-2">Músculos Secundarios</h4>
+                                <div id="detailSecondaryMuscles" class="text-gray-600">
+                                    <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-sm mr-1 mb-1">Core</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-600">Categoría:</span>
+                                <span id="detailCategory" class="font-semibold ml-2">Glúteos</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Dificultad:</span>
+                                <span id="detailDifficulty" class="font-semibold ml-2">Intermedio</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Equipo:</span>
+                                <span id="detailEquipment" class="font-semibold ml-2">Mancuernas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sample exercises data based on the Excel file
+        const exercisesData = [
+            // Glutes
+            {
+                id: 1,
+                name: "Puente de Cadera",
+                category: "glutes",
+                difficulty: "beginner",
+                equipment: "bodyweight",
+                description: "Ejercicio fundamental para activar y fortalecer los glúteos",
+                instructions: "1. Acuéstate de espaldas con rodillas flexionadas\n2. Presiona los talones en el suelo\n3. Eleva la cadera contrayendo glúteos\n4. Mantén 2 segundos en la parte alta\n5. Baja controladamente",
+                primaryMuscles: "Glúteo mayor",
+                secondaryMuscles: "Core, Isquiosurales",
+                imageUrl: "https://via.placeholder.com/300x200?text=Puente+de+Cadera",
+                videoUrl: "https://youtube.com/example"
+            },
+            {
+                id: 2,
+                name: "Sentadilla",
+                category: "glutes",
+                difficulty: "intermediate",
+                equipment: "bodyweight",
+                description: "Ejercicio compuesto fundamental para glúteos y piernas",
+                instructions: "1. Pies al ancho de caderas\n2. Desciende flexionando cadera y rodillas\n3. Mantén pecho erguido\n4. Empuja desde los talones para subir\n5. Contrae glúteos en la parte alta",
+                primaryMuscles: "Glúteo mayor, Cuádriceps",
+                secondaryMuscles: "Core, Isquiosurales",
+                imageUrl: "https://via.placeholder.com/300x200?text=Sentadilla",
+                videoUrl: "https://youtube.com/example"
+            },
+            {
+                id: 3,
+                name: "Hip Thrust",
+                category: "glutes",
+                difficulty: "intermediate",
+                equipment: "barbell",
+                description: "Ejercicio excelente para hipertrofia de glúteos",
+                instructions: "1. Apoya la espalda en un banco\n2. Barra sobre las caderas\n3. Empuja hacia arriba contrayendo glúteos\n4. Mantén 2 segundos contrayendo fuerte\n5. Baja controladamente",
+                primaryMuscles: "Glúteo mayor",
+                secondaryMuscles: "Core, Isquiosurales",
+                imageUrl: "https://via.placeholder.com/300x200?text=Hip+Thrust",
+                videoUrl: "https://youtube.com/example"
+            },
+            
+            // Quadriceps
+            {
+                id: 4,
+                name: "Búlgara",
+                category: "quadriceps",
+                difficulty: "intermediate",
+                equipment: "dumbbells",
+                description: "Sentadilla unilateral desafiante para cuádriceps y glúteos",
+                instructions: "1. Coloca pie trasero en banco\n2. Desciende manteniendo torso erguido\n3. Rodilla trasera casi toca el suelo\n4. Empuja desde el talón delantero\n5. Contrae cuádriceps y glúteos",
+                primaryMuscles: "Cuádriceps, Glúteo mayor",
+                secondaryMuscles: "Core, Isquiosurales",
+                imageUrl: "https://via.placeholder.com/300x200?text=Bulgara",
+                videoUrl: "https://youtube.com/example"
+            },
+            {
+                id: 5,
+                name: "Zissy",
+                category: "quadriceps",
+                difficulty: "advanced",
+                equipment: "bodyweight",
+                description: "Variación avanzada de sentadilla para resistencia muscular",
+                instructions: "1. Posición de sentadilla mantenida\n2. Realiza pequeños movimientos pulsantes\n3. Mantén tensión constante\n4. Controla la respiración\n5. Mantén por tiempo especificado",
+                primaryMuscles: "Cuádriceps, Glúteos",
+                secondaryMuscles: "Core",
+                imageUrl: "https://via.placeholder.com/300x200?text=Zissy",
+                videoUrl: "https://youtube.com/example"
+            },
+            
+            // Hamstrings
+            {
+                id: 6,
+                name: "Curl Femoral con Banda",
+                category: "hamstrings",
+                difficulty: "beginner",
+                equipment: "resistance",
+                description: "Aislamiento de isquiosurales con banda de resistencia",
+                instructions: "1. Acuéstate boca abajo\n2. Banda alrededor de tobillos\n3. Flexiona rodillas lentamente\n4. Contrae isquiosurales\n5. Baja controladamente",
+                primaryMuscles: "Isquiosurales",
+                secondaryMuscles: "Glúteos",
+                imageUrl: "https://via.placeholder.com/300x200?text=Curl+Femoral",
+                videoUrl: "https://youtube.com/example"
+            },
+            {
+                id: 7,
+                name: "Peso Muerto",
+                category: "hamstrings",
+                difficulty: "intermediate",
+                equipment: "barbell",
+                description: "Ejercicio compuesto excelente para posterior de piernas",
+                instructions: "1. Pies al ancho de caderas\n2. Barra cerca de las piernas\n3. Empuja caderas hacia atrás\n4. Mantén espalda recta\n5. Empuja desde los talones para subir",
+                primaryMuscles: "Isquiosurales, Glúteo mayor",
+                secondaryMuscles: "Espalda baja, Core",
+                imageUrl: "https://via.placeholder.com/300x200?text=Peso+Muerto",
+                videoUrl: "https://youtube.com/example"
+            },
+            
+            // Core
+            {
+                id: 8,
+                name: "Plancha",
+                category: "core",
+                difficulty: "beginner",
+                equipment: "bodyweight",
+                description: "Ejercicio isométrico fundamental para fortalecer el core",
+                instructions: "1. Apoya antebrazos en el suelo\n2. Mantén cuerpo en línea recta\n3. Contráe abdomen y glúteos\n4. No arquee la espalda\n5. Mantén respiración normal",
+                primaryMuscles: "Core, Abdomen",
+                secondaryMuscles: "Hombros, Glúteos",
+                imageUrl: "https://via.placeholder.com/300x200?text=Plancha",
+                videoUrl: "https://youtube.com/example"
+            },
+            {
+                id: 9,
+                name: "Crunch",
+                category: "core",
+                difficulty: "beginner",
+                equipment: "bodyweight",
+                description: "Ejercicio básico para abdomen recto",
+                instructions: "1. Acuéstate de espaldas con rodillas flexionadas\n2. Manos detrás de la cabeza\n3. Eleva torso contrayendo abdomen\n4. No jales el cuello\n5. Baja controladamente",
+                primaryMuscles: "Abdomen recto",
+                secondaryMuscles: "Core",
+                imageUrl: "https://via.placeholder.com/300x200?text=Crunch",
+                videoUrl: "https://youtube.com/example"
+            },
+            
+            // Cardio
+            {
+                id: 10,
+                name: "Burpees",
+                category: "cardio",
+                difficulty: "intermediate",
+                equipment: "bodyweight",
+                description: "Ejercicio cardiovascular completo de alta intensidad",
+                instructions: "1. Posición de sentadilla\n2. Salta hacia atrás a plancha\n3. Flexión de pecho\n4. Salta adelante\n5. Salto vertical con brazos arriba",
+                primaryMuscles: "Todo el cuerpo",
+                secondaryMuscles: "Cardiovascular",
+                imageUrl: "https://via.placeholder.com/300x200?text=Burpees",
+                videoUrl: "https://youtube.com/example"
+            },
+            {
+                id: 11,
+                name: "Saltos de Tijera",
+                category: "cardio",
+                difficulty: "beginner",
+                equipment: "bodyweight",
+                description: "Ejercicio cardiovascular simple y efectivo",
+                instructions: "1. Pies juntos, brazos a los lados\n2. Salta separando piernas y levantando brazos\n3. Vuelve a posición inicial\n4. Mantén ritmo constante\n5. Respira uniformemente",
+                primaryMuscles: "Piernas, Glúteos",
+                secondaryMuscles: "Cardiovascular",
+                imageUrl: "https://via.placeholder.com/300x200?text=Saltos+Tijera",
+                videoUrl: "https://youtube.com/example"
+            },
+            
+            // Upper body
+            {
+                id: 12,
+                name: "Flexiones",
+                category: "upper",
+                difficulty: "intermediate",
+                equipment: "bodyweight",
+                description: "Ejercicio clásico para tren superior",
+                instructions: "1. Manos al ancho de hombros\n2. Mantén cuerpo en línea recta\n3. Baja controladamente\n4. Empuja desde el pecho\n5. Mantén core activado",
+                primaryMuscles: "Pecho, Tríceps",
+                secondaryMuscles: "Hombros, Core",
+                imageUrl: "https://via.placeholder.com/300x200?text=Flexiones",
+                videoUrl: "https://youtube.com/example"
+            }
+        ];
+        
+        // Render exercises
+        function renderExercises(exercises = exercisesData) {
+            const grid = document.getElementById('exercisesGrid');
+            grid.innerHTML = '';
+            
+            exercises.forEach(exercise => {
+                const exerciseCard = document.createElement('div');
+                exerciseCard.className = 'exercise-card card rounded-xl overflow-hidden';
+                exerciseCard.onclick = () => viewExercise(exercise);
+                
+                const difficultyColors = {
+                    beginner: 'bg-green-100 text-green-800',
+                    intermediate: 'bg-yellow-100 text-yellow-800',
+                    advanced: 'bg-red-100 text-red-800'
+                };
+                
+                const equipmentIcons = {
+                    bodyweight: 'fas fa-user',
+                    dumbbells: 'fas fa-dumbbell',
+                    barbell: 'fas fa-weight-hanging',
+                    machine: 'fas fa-cog',
+                    resistance: 'fas fa-expand-arrows-alt',
+                    kettlebell: 'fas fa-circle'
+                };
+                
+                exerciseCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${exercise.imageUrl}" alt="${exercise.name}" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2">
+                            <span class="px-2 py-1 ${difficultyColors[exercise.difficulty]} text-xs rounded-full">
+                                ${exercise.difficulty}
+                            </span>
+                        </div>
+                        <div class="absolute top-2 left-2">
+                            <div class="w-8 h-8 bg-white bg-opacity-90 rounded-full flex items-center justify-center">
+                                <i class="${equipmentIcons[exercise.equipment]} text-gray-700"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="font-semibold text-gray-800 mb-2">${exercise.name}</h3>
+                        <p class="text-sm text-gray-600 mb-3 line-clamp-2">${exercise.description}</p>
+                        
+                        <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+                            <span class="capitalize">${exercise.category}</span>
+                            <span>${exercise.equipment}</span>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${exercise.primaryMuscles.split(',').slice(0, 2).map(muscle => 
+                                `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${muscle.trim()}</span>`
+                            ).join('')}
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm">
+                                <i class="fas fa-eye mr-1"></i>Ver
+                            </button>
+                            <button onclick="event.stopPropagation(); addToRoutine(${exercise.id})" 
+                                    class="text-green-600 hover:text-green-800 text-sm">
+                                <i class="fas fa-plus mr-1"></i>Agregar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(exerciseCard);
+            });
+        }
+        
+        // Filter exercises by category
+        function filterExercises(category) {
+            // Update active filter
+            document.querySelectorAll('.category-filter').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+            
+            // Filter exercises
+            const filteredExercises = category === 'all' 
+                ? exercisesData 
+                : exercisesData.filter(ex => ex.category === category);
+            
+            renderExercises(filteredExercises);
+        }
+        
+        // Search exercises
+        function searchExercises(searchTerm) {
+            const filteredExercises = exercisesData.filter(exercise =>
+                exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                exercise.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                exercise.primaryMuscles.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            renderExercises(filteredExercises);
+        }
+        
+        // View exercise details
+        function viewExercise(exercise) {
+            document.getElementById('detailExerciseName').textContent = exercise.name;
+            document.getElementById('detailExerciseImage').src = exercise.imageUrl;
+            document.getElementById('detailDescription').textContent = exercise.description;
+            document.getElementById('detailInstructions').innerHTML = exercise.instructions.split('\n').map((inst, i) => 
+                `<li>${i + 1}. ${inst.replace(/^\d+\.\s*/, '')}</li>`
+            ).join('');
+            
+            // Primary muscles
+            const primaryMusclesContainer = document.getElementById('detailPrimaryMuscles');
+            primaryMusclesContainer.innerHTML = exercise.primaryMuscles.split(',').map(muscle => 
+                `<span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-1 mb-1">${muscle.trim()}</span>`
+            ).join('');
+            
+            // Secondary muscles
+            const secondaryMusclesContainer = document.getElementById('detailSecondaryMuscles');
+            secondaryMusclesContainer.innerHTML = exercise.secondaryMuscles.split(',').map(muscle => 
+                `<span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-sm mr-1 mb-1">${muscle.trim()}</span>`
+            ).join('');
+            
+            document.getElementById('detailCategory').textContent = exercise.category;
+            document.getElementById('detailDifficulty').textContent = exercise.difficulty;
+            document.getElementById('detailEquipment').textContent = exercise.equipment;
+            
+            document.getElementById('exerciseDetailModal').classList.remove('hidden');
+            document.getElementById('exerciseDetailModal').classList.add('flex');
+        }
+        
+        // Modal functions
+        function openExerciseModal() {
+            document.getElementById('exerciseModal').classList.remove('hidden');
+            document.getElementById('exerciseModal').classList.add('flex');
+        }
+        
+        function closeExerciseModal() {
+            document.getElementById('exerciseModal').classList.add('hidden');
+            document.getElementById('exerciseModal').classList.remove('flex');
+            document.getElementById('exerciseForm').reset();
+        }
+        
+        function closeExerciseDetailModal() {
+            document.getElementById('exerciseDetailModal').classList.add('hidden');
+            document.getElementById('exerciseDetailModal').classList.remove('flex');
+        }
+        
+        // Add to routine
+        function addToRoutine(exerciseId) {
+            alert(`Ejercicio ${exerciseId} agregado a la rutina\n\nFuncionalidad en desarrollo...`);
+        }
+        
+        // Form submission
+        document.getElementById('exerciseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const exerciseData = Object.fromEntries(formData);
+            
+            // Add to exercises array (in real app, send to server)
+            const newExercise = {
+                id: exercisesData.length + 1,
+                name: exerciseData.exerciseName,
+                category: exerciseData.category,
+                difficulty: exerciseData.difficulty || 'beginner',
+                equipment: exerciseData.equipment || 'bodyweight',
+                description: exerciseData.description,
+                instructions: exerciseData.instructions || 'Instrucciones básicas...',
+                primaryMuscles: exerciseData.primaryMuscles || 'No especificado',
+                secondaryMuscles: exerciseData.secondaryMuscles || 'No especificado',
+                imageUrl: exerciseData.imageUrl || 'https://via.placeholder.com/300x200?text=Nuevo+Ejercicio',
+                videoUrl: exerciseData.videoUrl || ''
+            };
+            
+            exercisesData.unshift(newExercise);
+            renderExercises();
+            closeExerciseModal();
+            
+            // Show success message
+            alert('Ejercicio agregado exitosamente!');
+        });
+        
+        // Event listeners
+        document.getElementById('searchExercise').addEventListener('input', function(e) {
+            searchExercises(e.target.value);
+        });
+        
+        document.querySelectorAll('.category-filter').forEach(button => {
+            button.addEventListener('click', function() {
+                filterExercises(this.dataset.category);
+            });
+        });
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderExercises();
+            
+            // Animate elements
+            anime({
+                targets: '.fade-in',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(150),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    window.location.href = href;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

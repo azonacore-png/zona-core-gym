@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - ZONA CORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #2A5B8A;
+            --neutral-gray: #5A5A5A;
+            --accent-orange: #FF7A3C;
+            --light-gray: #F8F9FA;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-blue) 0%, #1e3a5f 100%);
+            backdrop-filter: blur(10px);
+        }
+        
+        .main-content {
+            background: var(--light-gray);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #ff6b2b 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 122, 60, 0.3);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 122, 60, 0.2);
+            border-left: 4px solid var(--accent-orange);
+        }
+        
+        .report-card {
+            transition: all 0.3s ease;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<script src="js/backup.js"></script>
+
+<body>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 text-white p-6 flex flex-col">
+            <div class="mb-8">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dumbbell text-2xl" style="color: var(--primary-blue);"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">ZONA CORE</h1>
+                        <p class="text-sm opacity-80">Admin Panel</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 space-y-2">
+                <a href="index.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="pagos.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pagos</span>
+                </a>
+                <a href="clases.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Clases</span>
+                </a>
+                <a href="progreso.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progreso</span>
+                </a>
+                <a href="ejercicios.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-book"></i>
+                    <span>Biblioteca</span>
+                </a>
+                <a href="#" class="nav-item active flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="configuracion.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+            
+            <div class="mt-auto">
+                <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Administrador</p>
+                            <p class="text-xs opacity-80">ZONA CORE</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Reportes y Análisis</h2>
+                        <p class="text-gray-600">Genera reportes detallados de ZONA CORE</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="month">Este Mes</option>
+                            <option value="quarter">Este Trimestre</option>
+                            <option value="year">Este Año</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                        <button onclick="generateReport()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-file-pdf mr-2"></i>Generar PDF
+                        </button>
+                        <div class="relative">
+                            <button class="p-2 text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Report Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in">
+                    <div class="report-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">Ingresos Totales</p>
+                                <p class="text-3xl font-bold text-gray-800">$8,240</p>
+                                <p class="text-green-600 text-sm mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>+12% vs período anterior
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">Clientes Activos</p>
+                                <p class="text-3xl font-bold text-gray-800">127</p>
+                                <p class="text-blue-600 text-sm mt-1">
+                                    <i class="fas fa-users mr-1"></i>+8 nuevos
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">Asistencia Promedio</p>
+                                <p class="text-3xl font-bold text-gray-800">89%</p>
+                                <p class="text-orange-600 text-sm mt-1">
+                                    <i class="fas fa-chart-line mr-1"></i>Muy buena
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-pie text-orange-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">Membresías Vendidas</p>
+                                <p class="text-3xl font-bold text-gray-800">45</p>
+                                <p class="text-purple-600 text-sm mt-1">
+                                    <i class="fas fa-certificate mr-1"></i>Este mes
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-certificate text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="card rounded-xl p-6 fade-in">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Ingresos Mensuales</h3>
+                            <button onclick="exportChart('income')" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                        <div id="incomeChart" style="height: 300px;"></div>
+                    </div>
+                    
+                    <div class="card rounded-xl p-6 fade-in">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Distribución de Membresías</h3>
+                            <button onclick="exportChart('membership')" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                        <div id="membershipChart" style="height: 300px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Reports -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Financial Reports -->
+                    <div class="card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Reportes Financieros</h3>
+                        <div class="space-y-3">
+                            <button onclick="generateFinancialReport()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-dollar-sign text-green-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Ingresos por Mes</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            
+                            <button onclick="generatePaymentReport()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-credit-card text-blue-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Estado de Pagos</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            
+                            <button onclick="generateDebtReport()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-exclamation-triangle text-red-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Clientes Morosos</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Operational Reports -->
+                    <div class="card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Reportes Operacionales</h3>
+                        <div class="space-y-3">
+                            <button onclick="generateAttendanceReport()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-calendar-check text-orange-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Asistencia a Clases</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            
+                            <button onclick="generateClientReport()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-users text-purple-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Estadísticas de Clientes</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            
+                            <button onclick="generateProgressReport()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-chart-line text-blue-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Progreso de Clientes</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+                    <div class="card rounded-xl p-6">
+                        <h4 class="font-semibold text-gray-800 mb-4">Clases Más Populares</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Core Funcional</span>
+                                <span class="font-semibold">45 asistencias</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Glúteos & Piernas</span>
+                                <span class="font-semibold">38 asistencias</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Full Body</span>
+                                <span class="font-semibold">32 asistencias</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card rounded-xl p-6">
+                        <h4 class="font-semibold text-gray-800 mb-4">Membresías por Tipo</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Mensual</span>
+                                <span class="font-semibold">67 clientes</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Trimestral</span>
+                                <span class="font-semibold">34 clientes</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Anual</span>
+                                <span class="font-semibold">26 clientes</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card rounded-xl p-6">
+                        <h4 class="font-semibold text-gray-800 mb-4">Próximos Vencimientos</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Esta semana</span>
+                                <span class="font-semibold text-orange-600">5 clientes</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Próximo mes</span>
+                                <span class="font-semibold text-blue-600">18 clientes</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Vencidos</span>
+                                <span class="font-semibold text-red-600">3 clientes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Income Chart
+            const incomeChart = echarts.init(document.getElementById('incomeChart'));
+            const incomeOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                legend: {
+                    data: ['Ingresos', 'Gastos', 'Ganancias']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: '${value}'
+                    }
+                },
+                series: [
+                    {
+                        name: 'Ingresos',
+                        type: 'line',
+                        stack: 'Total',
+                        smooth: true,
+                        lineStyle: {
+                            width: 3,
+                            color: '#2A5B8A'
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0, y: 0, x2: 0, y2: 1,
+                                colorStops: [
+                                    {offset: 0, color: 'rgba(42, 91, 138, 0.3)'},
+                                    {offset: 1, color: 'rgba(42, 91, 138, 0.05)'}
+                                ]
+                            }
+                        },
+                        data: [2400, 2100, 2800, 2200, 2500, 2800, 2600, 2400, 2350, 2500, 2450, 2800]
+                    },
+                    {
+                        name: 'Gastos',
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: {
+                            width: 2,
+                            color: '#FF7A3C'
+                        },
+                        data: [800, 750, 900, 800, 850, 900, 850, 800, 750, 800, 850, 900]
+                    },
+                    {
+                        name: 'Ganancias',
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: {
+                            width: 2,
+                            color: '#54A0FF'
+                        },
+                        data: [1600, 1350, 1900, 1400, 1650, 1900, 1750, 1600, 1600, 1700, 1600, 1900]
+                    }
+                ]
+            };
+            incomeChart.setOption(incomeOption);
+            
+            // Membership Chart
+            const membershipChart = echarts.init(document.getElementById('membershipChart'));
+            const membershipOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data: ['Mensual', 'Trimestral', 'Semestral', 'Anual']
+                },
+                series: [{
+                    name: 'Membresías',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '18',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: [
+                        {value: 67, name: 'Mensual', itemStyle: {color: '#2A5B8A'}},
+                        {value: 34, name: 'Trimestral', itemStyle: {color: '#FF7A3C'}},
+                        {value: 15, name: 'Semestral', itemStyle: {color: '#54A0FF'}},
+                        {value: 26, name: 'Anual', itemStyle: {color: '#5A5A5A'}}
+                    ]
+                }]
+            };
+            membershipChart.setOption(membershipOption);
+            
+            // Animate elements
+            anime({
+                targets: '.fade-in',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(150),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+        
+        // Report generation functions
+        function generateReport() {
+            alert('Generando reporte completo en PDF...\n\nFuncionalidad en desarrollo');
+        }
+        
+        function exportChart(chartType) {
+            alert(`Exportando gráfico ${chartType}...\n\nFuncionalidad en desarrollo`);
+        }
+        
+        function generateFinancialReport() {
+            alert('Generando reporte financiero detallado...\n\nFuncionalidad en desarrollo');
+        }
+        
+        function generatePaymentReport() {
+            alert('Generando reporte de estado de pagos...\n\nFuncionalidad en desarrollo');
+        }
+        
+        function generateDebtReport() {
+            alert('Generando reporte de clientes morosos...\n\nFuncionalidad en desarrollo');
+        }
+        
+        function generateAttendanceReport() {
+            alert('Generando reporte de asistencia...\n\nFuncionalidad en desarrollo');
+        }
+        
+        function generateClientReport() {
+            alert('Generando reporte de estadísticas de clientes...\n\nFuncionalidad en desarrollo');
+        }
+        
+        function generateProgressReport() {
+            alert('Generando reporte de progreso de clientes...\n\nFuncionalidad en desarrollo');
+        }
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    window.location.href = href;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
