@@ -774,65 +774,22 @@
             }
         }
 
-        // Form submission
-        document.getElementById('newClientForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitButton = document.getElementById('submitButton');
-            const originalText = submitButton.innerHTML;
-            submitButton.innerHTML = '<div class="loading"></div> Guardando...';
-            submitButton.disabled = true;
-            
-            try {
-                // Get form data
-                const formData = new FormData(this);
-                const clientData = Object.fromEntries(formData);
-                const clientId = clientData.clientId;
+       -- Política para permitir todo a los administradores (desde cualquier origen)
+CREATE POLICY "Permitir todas las operaciones" ON "public"."clientes"
+FOR ALL USING (true);
 
-                // Prepare data for Supabase
-                const clientInfo = {
-                    nombre: clientData.nombre,
-                    email: clientData.email,
-                    telefono: clientData.telefono,
-                    fecha_nacimiento: clientData.fecha_nacimiento || null,
-                    genero: clientData.genero || null,
-                    ocupacion: clientData.ocupacion || null,
-                    experiencia_ejercicio: clientData.experiencia_ejercicio === 'true',
-                    contacto_emergencia: clientData.contacto_emergencia || null,
-                    telefono_emergencia: clientData.telefono_emergencia || null,
-                    alergias: clientData.alergias || null,
-                    condiciones_medicas: clientData.condiciones_medicas || null,
-                    restricciones_medicas: clientData.restricciones_medicas || null,
-                    membresia_tipo: clientData.membresia_tipo,
-                    estado: clientData.estado,
-                    fecha_ingreso: clientData.fecha_ingreso || new Date().toISOString().split('T')[0],
-                    proximo_pago: clientData.proximo_pago || calculateNextPayment(clientData.membresia_tipo),
-                    observaciones: clientData.observaciones || null
-                };
+-- O si prefieres políticas más específicas:
+CREATE POLICY "Permitir inserción" ON "public"."clientes"
+FOR INSERT WITH CHECK (true);
 
-                let savedClient;
-                if (isEditing && clientId) {
-                    // Actualizar cliente existente
-                    savedClient = await ClientesService.actualizarCliente(clientId, clientInfo);
-                    showNotification('Cliente actualizado exitosamente!', 'success');
-                } else {
-                    // Crear nuevo cliente
-                    savedClient = await ClientesService.crearCliente(clientInfo);
-                    showNotification('Cliente agregado exitosamente!', 'success');
-                }
-                
-                // Reload clients
-                await loadClients();
-                closeNewClientModal();
-                
-            } catch (error) {
-                console.error('Error guardando cliente:', error);
-                showNotification('Error al guardar el cliente: ' + error.message, 'error');
-            } finally {
-                submitButton.innerHTML = originalText;
-                submitButton.disabled = false;
-            }
-        });
+CREATE POLICY "Permitir selección" ON "public"."clientes"
+FOR SELECT USING (true);
+
+CREATE POLICY "Permitir actualización" ON "public"."clientes"
+FOR UPDATE USING (true);
+
+CREATE POLICY "Permitir eliminación" ON "public"."clientes"
+FOR DELETE USING (true);
 
         // Filter functions
         function applyFilters() {
