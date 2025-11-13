@@ -1,216 +1,891 @@
-// En clientes.html - después de cargar supabase.js
-<script type="module">
-    import './supabase.js'
-
-    let clientes = []
-
-    // Cargar clientes desde Supabase
-    async function cargarClientes() {
-        try {
-            const loader = document.getElementById('loadingClientes')
-            if (loader) loader.classList.remove('hidden')
-            
-            clientes = await ClientesService.obtenerClientes()
-            renderClientes(clientes)
-            
-            if (loader) loader.classList.add('hidden')
-        } catch (error) {
-            console.error('Error cargando clientes:', error)
-            mostrarNotificacion('❌ Error cargando clientes', 'error')
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - ZONA CORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #2A5B8A;
+            --neutral-gray: #5A5A5A;
+            --accent-orange: #FF7A3C;
+            --light-gray: #F8F9FA;
+            --white: #FFFFFF;
         }
-    }
-
-    // Renderizar clientes en la grid
-    function renderClientes(clientesArray = clientes) {
-        const grid = document.getElementById('clientsGrid')
-        if (!grid) return
         
-        grid.innerHTML = ''
-
-        if (clientesArray.length === 0) {
-            grid.innerHTML = `
-                <div class="col-span-full text-center py-12">
-                    <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-500">No hay clientes registrados</h3>
-                    <p class="text-gray-400">Comienza agregando tu primer cliente</p>
-                </div>
-            `
-            return
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
-
-        clientesArray.forEach(cliente => {
-            const statusColor = {
-                active: 'bg-green-100 text-green-800',
-                inactive: 'bg-gray-100 text-gray-800',
-                expired: 'bg-red-100 text-red-800'
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-blue) 0%, #1e3a5f 100%);
+            backdrop-filter: blur(10px);
+        }
+        
+        .main-content {
+            background: var(--light-gray);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #ff6b2b 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 122, 60, 0.3);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 122, 60, 0.2);
+            border-left: 4px solid var(--accent-orange);
+        }
+        
+        .client-card {
+            transition: all 0.3s ease;
+        }
+        
+        .client-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal {
+            backdrop-filter: blur(10px);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Estilos para el modal de detalles del cliente */
+        .client-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .client-details-grid {
+                grid-template-columns: 1fr;
             }
+        }
+        
+        .detail-item {
+            margin-bottom: 1rem;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--neutral-gray);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            color: #1f2937;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 text-white p-6 flex flex-col">
+            <div class="mb-8">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dumbbell text-2xl" style="color: var(--primary-blue);"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">ZONA CORE</h1>
+                        <p class="text-sm opacity-80">Admin Panel</p>
+                    </div>
+                </div>
+            </div>
             
-            const statusText = {
-                active: 'Activo',
-                inactive: 'Inactivo',
-                expired: 'Vencido'
-            }
-
-            const clientCard = document.createElement('div')
-            clientCard.className = 'client-card card rounded-xl p-6 cursor-pointer'
-            clientCard.onclick = () => openClientDetails(cliente)
-
-            clientCard.innerHTML = `
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                        <span class="text-white font-medium">${getInitials(cliente.nombre)}</span>
+            <nav class="flex-1 space-y-2">
+                <a href="index.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item active flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="pagos.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pagos</span>
+                </a>
+                <a href="clases.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Clases</span>
+                </a>
+                <a href="progreso.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progreso</span>
+                </a>
+                <a href="ejercicios.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-book"></i>
+                    <span>Biblioteca</span>
+                </a>
+                <a href="reportes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="configuracion.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+            
+            <div class="mt-auto">
+                <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Administrador</p>
+                            <p class="text-xs opacity-80">ZONA CORE</p>
+                        </div>
                     </div>
-                    <div class="flex-1">
-                        <h3 class="font-semibold text-gray-800">${cliente.nombre}</h3>
-                        <p class="text-sm text-gray-600">${cliente.membresia || 'Sin membresía'}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Gestión de Clientes</h2>
+                        <p class="text-gray-600">Administra todos los clientes de ZONA CORE</p>
                     </div>
-                    <span class="px-3 py-1 ${statusColor[cliente.estado || 'active']} text-xs rounded-full">
-                        ${statusText[cliente.estado || 'active']}
-                    </span>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="openNewClientModal()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-plus mr-2"></i>Nuevo Cliente
+                        </button>
+                        <div class="relative">
+                            <button class="p-2 text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Connection Status -->
+                <div id="connectionStatus" class="hidden mb-4">
+                    <!-- Se mostrará el estado de conexión aquí -->
                 </div>
                 
-                <div class="space-y-2 text-sm">
-                    <div class="flex items-center text-gray-600">
-                        <i class="fas fa-envelope mr-2 w-4"></i>
-                        <span>${cliente.email || 'Sin email'}</span>
-                    </div>
-                    <div class="flex items-center text-gray-600">
-                        <i class="fas fa-phone mr-2 w-4"></i>
-                        <span>${cliente.telefono || 'Sin teléfono'}</span>
-                    </div>
-                    <div class="flex items-center text-gray-600">
-                        <i class="fas fa-calendar mr-2 w-4"></i>
-                        <span>Ingreso: ${new Date(cliente.fecha_registro).toLocaleDateString()}</span>
+                <!-- Filters -->
+                <div class="card rounded-xl p-6 mb-6 fade-in">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex-1 min-w-64">
+                            <input type="text" id="searchInput" placeholder="Buscar cliente..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Todos los estados</option>
+                            <option value="active">Activos</option>
+                            <option value="inactive">Inactivos</option>
+                            <option value="expired">Vencidos</option>
+                        </select>
+                        <select id="membershipFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Todas las membresías</option>
+                            <option value="monthly">Mensual</option>
+                            <option value="quarterly">Trimestral</option>
+                            <option value="semester">Semestral</option>
+                            <option value="annual">Anual</option>
+                        </select>
+                        <button onclick="applyFilters()" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                            <i class="fas fa-filter mr-2"></i>Filtrar
+                        </button>
+                        <button onclick="clearFilters()" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                            <i class="fas fa-times mr-2"></i>Limpiar
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button onclick="event.stopPropagation(); editarCliente('${cliente.id}')" 
-                            class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg hover:bg-blue-200">
-                        <i class="fas fa-edit mr-1"></i>Editar
-                    </button>
-                    <button onclick="event.stopPropagation(); verProgreso('${cliente.id}')" 
-                            class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-lg hover:bg-green-200">
-                        <i class="fas fa-chart-line mr-1"></i>Progreso
+                <!-- Loading State -->
+                <div id="loadingState" class="flex justify-center items-center py-12">
+                    <div class="text-center">
+                        <div class="loading mx-auto mb-4"></div>
+                        <p class="text-gray-600">Cargando clientes...</p>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden text-center py-12">
+                    <i class="fas fa-users text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay clientes registrados</h3>
+                    <p class="text-gray-500 mb-6">Comienza agregando tu primer cliente al sistema.</p>
+                    <button onclick="openNewClientModal()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>Agregar Primer Cliente
                     </button>
                 </div>
-            `
+                
+                <!-- Clients Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in hidden" id="clientsGrid">
+                    <!-- Client cards will be dynamically generated from Supabase -->
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- New Client Modal -->
+    <div id="newClientModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Nuevo Cliente</h3>
+                <button onclick="closeNewClientModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
             
-            grid.appendChild(clientCard)
-        })
-    }
-
-    // Función para crear nuevo cliente
-    async function crearCliente(clienteData) {
-        try {
-            const nuevoCliente = await ClientesService.crearCliente({
-                nombre: clienteData.fullName,
-                email: clienteData.email,
-                telefono: clienteData.phone,
-                fecha_nacimiento: clienteData.birthDate,
-                genero: clienteData.gender,
-                ocupacion: clienteData.occupation,
-                experiencia_ejercicio: clienteData.hasExerciseExperience,
-                contacto_emergencia: clienteData.emergencyContact,
-                telefono_emergencia: clienteData.emergencyPhone,
-                alergias: clienteData.allergies,
-                condiciones_medicas: clienteData.medicalConditions,
-                tipo_membresia: clienteData.membershipType,
-                estado: 'active',
-                fecha_registro: new Date().toISOString()
-            })
-
-            mostrarNotificacion('✅ Cliente creado exitosamente', 'success')
-            await cargarClientes() // Recargar la lista
-            return nuevoCliente
+            <form id="newClientForm" class="space-y-6">
+                <!-- Personal Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
+                        <input type="text" name="fullName" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                        <input type="email" name="email" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+                        <input type="tel" name="phone" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Nacimiento</label>
+                        <input type="date" name="birthDate" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
+                        <select name="gender" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Seleccionar</option>
+                            <option value="female">Femenino</option>
+                            <option value="male">Masculino</option>
+                            <option value="other">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
+                        <input type="text" name="occupation" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <!-- Exercise Experience -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">¿Ha hecho ejercicio antes? *</label>
+                    <div class="flex space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="hasExerciseExperience" value="yes" class="mr-2">
+                            <span>Sí</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="hasExerciseExperience" value="no" class="mr-2">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Emergency Contact -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contacto de Emergencia</label>
+                        <input type="text" name="emergencyContact" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tel. Emergencia</label>
+                        <input type="tel" name="emergencyPhone" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <!-- Medical Information -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alergias</label>
+                    <textarea name="allergies" rows="2" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Listar alergias conocidas..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Condiciones Médicas</label>
+                    <textarea name="medicalConditions" rows="2" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Describir condiciones médicas relevantes..."></textarea>
+                </div>
+                
+                <!-- Membership Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Membresía *</label>
+                    <select name="membershipType" required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Seleccionar membresía</option>
+                        <option value="monthly">Mensual - $80</option>
+                        <option value="quarterly">Trimestral - $220</option>
+                        <option value="semester">Semestral - $420</option>
+                        <option value="annual">Anual - $800</option>
+                    </select>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6">
+                    <button type="button" onclick="closeNewClientModal()" 
+                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitButton" 
+                            class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-save mr-2"></i>Guardar Cliente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Client Details Modal -->
+    <div id="clientDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-4xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Detalles del Cliente</h3>
+                <button onclick="closeClientDetailsModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
             
-        } catch (error) {
-            console.error('Error creando cliente:', error)
-            mostrarNotificacion('❌ Error creando cliente', 'error')
-            throw error
+            <div id="clientDetailsContent" class="client-details-grid">
+                <!-- Los detalles del cliente se cargarán aquí dinámicamente desde Supabase -->
+            </div>
+            
+            <div class="flex justify-end space-x-4 pt-6 mt-6 border-t border-gray-200">
+                <button onclick="closeClientDetailsModal()" 
+                        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Cerrar
+                </button>
+                <button id="editClientBtn" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                    <i class="fas fa-edit mr-2"></i>Editar Cliente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Connection Script -->
+    <script type="module">
+        // supabase.js - Conexión con Supabase
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        // Configuración de Supabase - REEMPLAZA con tus datos
+        const supabaseUrl = 'https://vfiawrvuoapsgxbbddku.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaWF3cnZ1b2Fwc2d4YmJkZGt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwNTAxNzYsImV4cCI6MjA3ODYyNjE3Nn0.TSBFZQoaQD-24sLr5QMV2tiIYndR-OmY4nBCj9UT7EE'
+
+        // Crear cliente de Supabase
+        const supabase = createClient(supabaseUrl, supabaseKey)
+
+        // Verificar conexión
+        async function testConnection() {
+            try {
+                const { data, error } = await supabase.from('clientes').select('count')
+                if (error) throw error
+                console.log('✅ Conectado a Supabase correctamente')
+                showConnectionStatus('success', 'Conectado a la base de datos')
+                return true
+            } catch (error) {
+                console.error('❌ Error conectando a Supabase:', error)
+                showConnectionStatus('error', 'Error de conexión a la base de datos')
+                return false
+            }
         }
-    }
 
-    // Helper functions
-    function getInitials(name) {
-        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
-    }
+        // Funciones para clientes
+        const ClientesService = {
+            // Obtener todos los clientes
+            async obtenerClientes() {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                
+                if (error) throw error
+                return data
+            },
 
-    function mostrarNotificacion(mensaje, tipo = 'info') {
-        // Tu código de notificaciones existente
-        alert(mensaje) // Temporal
-    }
+            // Crear nuevo cliente
+            async crearCliente(clienteData) {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .insert([clienteData])
+                    .select()
+                
+                if (error) throw error
+                return data[0]
+            },
 
-    // Modal functions (mantener tus funciones existentes)
-    function openNewClientModal() {
-        document.getElementById('newClientModal').classList.remove('hidden')
-        document.getElementById('newClientModal').classList.add('flex')
-    }
+            // Actualizar cliente
+            async actualizarCliente(id, updates) {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .update(updates)
+                    .eq('id', id)
+                    .select()
+                
+                if (error) throw error
+                return data[0]
+            },
 
-    function closeNewClientModal() {
-        document.getElementById('newClientModal').classList.add('hidden')
-        document.getElementById('newClientModal').classList.remove('flex')
-        document.getElementById('newClientForm').reset()
-    }
-
-    // Form submission actualizado
-    document.getElementById('newClientForm').addEventListener('submit', async function(e) {
-        e.preventDefault()
-        
-        try {
-            const formData = new FormData(this)
-            const clientData = Object.fromEntries(formData)
-            
-            await crearCliente(clientData)
-            closeNewClientModal()
-            
-        } catch (error) {
-            // Error ya manejado en crearCliente
+            // Eliminar cliente
+            async eliminarCliente(id) {
+                const { error } = await supabase
+                    .from('clientes')
+                    .delete()
+                    .eq('id', id)
+                
+                if (error) throw error
+                return true
+            }
         }
-    })
 
-    // Inicializar página
-    document.addEventListener('DOMContentLoaded', async function() {
-        // Probar conexión
-        const connected = await testConnection()
-        if (!connected) {
-            mostrarNotificacion('⚠️ Sin conexión a la base de datos', 'warning')
+        // Exportar para usar en otros archivos
+        window.supabase = supabase
+        window.ClientesService = ClientesService
+        window.testConnection = testConnection
+
+        // Mostrar estado de conexión
+        function showConnectionStatus(type, message) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.className = `p-4 rounded-lg mb-4 ${
+                type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
+                'bg-red-100 text-red-800 border border-red-200'
+            }`;
+            statusDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            statusDiv.classList.remove('hidden');
+        }
+    </script>
+    
+    <script>
+        // Variables globales
+        let allClients = [];
+        let currentClientId = null;
+
+        // Render clients from Supabase data
+        async function renderClients(clients = allClients) {
+            const grid = document.getElementById('clientsGrid');
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Ocultar loading state
+            loadingState.classList.add('hidden');
+            
+            if (clients.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+            grid.innerHTML = '';
+            
+            clients.forEach(client => {
+                const statusColor = {
+                    active: 'bg-green-100 text-green-800',
+                    inactive: 'bg-gray-100 text-gray-800',
+                    expired: 'bg-red-100 text-red-800'
+                };
+                
+                const statusText = {
+                    active: 'Activo',
+                    inactive: 'Inactivo',
+                    expired: 'Vencido'
+                };
+                
+                const clientCard = document.createElement('div');
+                clientCard.className = 'client-card card rounded-xl p-6 cursor-pointer';
+                clientCard.onclick = () => openClientDetails(client);
+                
+                clientCard.innerHTML = `
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="w-12 h-12 ${client.color || 'bg-blue-500'} rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium">${getInitials(client.nombre || client.full_name)}</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800">${client.nombre || client.full_name}</h3>
+                            <p class="text-sm text-gray-600">${client.membresia_tipo || client.membership_type}</p>
+                        </div>
+                        <span class="px-3 py-1 ${statusColor[client.estado || client.status]} text-xs rounded-full">
+                            ${statusText[client.estado || client.status]}
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-envelope mr-2 w-4"></i>
+                            <span>${client.email}</span>
+                        </div>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-phone mr-2 w-4"></i>
+                            <span>${client.telefono || client.phone}</span>
+                        </div>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-calendar mr-2 w-4"></i>
+                            <span>Ingreso: ${new Date(client.fecha_ingreso || client.join_date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-credit-card mr-2 w-4"></i>
+                            <span>Próximo pago: ${new Date(client.proximo_pago || client.next_payment).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-2 mt-4">
+                        <button onclick="event.stopPropagation(); editClient(${client.id})" 
+                                class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg hover:bg-blue-200">
+                            <i class="fas fa-edit mr-1"></i>Editar
+                        </button>
+                        <button onclick="event.stopPropagation(); viewProgress(${client.id})" 
+                                class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-lg hover:bg-green-200">
+                            <i class="fas fa-chart-line mr-1"></i>Progreso
+                        </button>
+                    </div>
+                `;
+                
+                grid.appendChild(clientCard);
+            });
+        }
+
+        // Cargar clientes desde Supabase
+        async function loadClients() {
+            try {
+                const clients = await ClientesService.obtenerClientes();
+                allClients = clients;
+                renderClients(clients);
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+                showNotification('Error al cargar los clientes', 'error');
+            }
+        }
+
+        // Modal functions
+        function openNewClientModal() {
+            document.getElementById('newClientModal').classList.remove('hidden');
+            document.getElementById('newClientModal').classList.add('flex');
         }
         
-        await cargarClientes()
+        function closeNewClientModal() {
+            document.getElementById('newClientModal').classList.add('hidden');
+            document.getElementById('newClientModal').classList.remove('flex');
+            document.getElementById('newClientForm').reset();
+        }
+
+        // Client Details Modal
+        function openClientDetails(client) {
+            currentClientId = client.id;
+            const modal = document.getElementById('clientDetailsModal');
+            const content = document.getElementById('clientDetailsContent');
+            
+            content.innerHTML = `
+                <div>
+                    <div class="detail-item">
+                        <div class="detail-label">Nombre Completo</div>
+                        <div class="detail-value">${client.nombre || client.full_name}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">${client.email}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Teléfono</div>
+                        <div class="detail-value">${client.telefono || client.phone}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Fecha de Nacimiento</div>
+                        <div class="detail-value">${client.fecha_nacimiento ? new Date(client.fecha_nacimiento).toLocaleDateString() : 'No especificada'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Sexo</div>
+                        <div class="detail-value">${getGenderText(client.genero || client.gender)}</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="detail-item">
+                        <div class="detail-label">Ocupación</div>
+                        <div class="detail-value">${client.ocupacion || client.occupation || 'No especificada'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Experiencia en Ejercicio</div>
+                        <div class="detail-value">${client.experiencia_ejercicio ? 'Sí' : 'No'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Tipo de Membresía</div>
+                        <div class="detail-value">${client.membresia_tipo || client.membership_type}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Estado</div>
+                        <div class="detail-value">
+                            <span class="px-2 py-1 rounded-full text-xs ${
+                                client.estado === 'active' ? 'bg-green-100 text-green-800' :
+                                client.estado === 'expired' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+                            }">
+                                ${client.estado === 'active' ? 'Activo' : client.estado === 'expired' ? 'Vencido' : 'Inactivo'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Fecha de Ingreso</div>
+                        <div class="detail-value">${new Date(client.fecha_ingreso || client.join_date).toLocaleDateString()}</div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
         
-        // Animaciones
-        anime({
-            targets: '.fade-in',
-            translateY: [30, 0],
-            opacity: [0, 1],
-            delay: anime.stagger(150),
-            duration: 600,
-            easing: 'easeOutExpo'
-        })
-    })
+        function closeClientDetailsModal() {
+            document.getElementById('clientDetailsModal').classList.add('hidden');
+            document.getElementById('clientDetailsModal').classList.remove('flex');
+            currentClientId = null;
+        }
 
-    // Funciones placeholder (para desarrollar después)
-    function openClientDetails(cliente) {
-        alert(`Detalles de ${cliente.nombre}\n\nID: ${cliente.id}\nFuncionalidad en desarrollo...`)
-    }
+        // Form submission
+        document.getElementById('newClientForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = document.getElementById('submitButton');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<div class="loading"></div> Guardando...';
+            submitButton.disabled = true;
+            
+            try {
+                // Get form data
+                const formData = new FormData(this);
+                const clientData = Object.fromEntries(formData);
+                
+                // Prepare data for Supabase
+                const newClient = {
+                    nombre: clientData.fullName,
+                    email: clientData.email,
+                    telefono: clientData.phone,
+                    fecha_nacimiento: clientData.birthDate || null,
+                    genero: clientData.gender || null,
+                    ocupacion: clientData.occupation || null,
+                    experiencia_ejercicio: clientData.hasExerciseExperience === 'yes',
+                    contacto_emergencia: clientData.emergencyContact || null,
+                    telefono_emergencia: clientData.emergencyPhone || null,
+                    alergias: clientData.allergies || null,
+                    condiciones_medicas: clientData.medicalConditions || null,
+                    membresia_tipo: clientData.membershipType,
+                    estado: 'active',
+                    fecha_ingreso: new Date().toISOString().split('T')[0],
+                    proximo_pago: calculateNextPayment(clientData.membershipType)
+                };
+                
+                // Save to Supabase
+                const savedClient = await ClientesService.crearCliente(newClient);
+                
+                // Reload clients
+                await loadClients();
+                closeNewClientModal();
+                
+                showNotification('Cliente agregado exitosamente!', 'success');
+                
+            } catch (error) {
+                console.error('Error guardando cliente:', error);
+                showNotification('Error al guardar el cliente', 'error');
+            } finally {
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
+        });
 
-    function editarCliente(clienteId) {
-        alert(`Editando cliente ID: ${clienteId}\n\nFuncionalidad en desarrollo...`)
-    }
+        // Filter functions
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const membershipFilter = document.getElementById('membershipFilter').value;
+            
+            const filteredClients = allClients.filter(client => {
+                const matchesSearch = 
+                    (client.nombre || client.full_name).toLowerCase().includes(searchTerm) ||
+                    client.email.toLowerCase().includes(searchTerm) ||
+                    (client.telefono || client.phone).includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || (client.estado === statusFilter);
+                const matchesMembership = !membershipFilter || (client.membresia_tipo === membershipFilter);
+                
+                return matchesSearch && matchesStatus && matchesMembership;
+            });
+            
+            renderClients(filteredClients);
+        }
+        
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('membershipFilter').value = '';
+            renderClients(allClients);
+        }
 
-    function verProgreso(clienteId) {
-        alert(`Viendo progreso del cliente ID: ${clienteId}\n\nFuncionalidad en desarrollo...`)
-    }
+        // Helper functions
+        function calculateNextPayment(membershipType) {
+            const today = new Date();
+            switch(membershipType) {
+                case 'monthly':
+                    today.setMonth(today.getMonth() + 1);
+                    break;
+                case 'quarterly':
+                    today.setMonth(today.getMonth() + 3);
+                    break;
+                case 'semester':
+                    today.setMonth(today.getMonth() + 6);
+                    break;
+                case 'annual':
+                    today.setFullYear(today.getFullYear() + 1);
+                    break;
+            }
+            return today.toISOString().split('T')[0];
+        }
+        
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+        
+        function getGenderText(gender) {
+            const genders = {
+                'female': 'Femenino',
+                'male': 'Masculino',
+                'other': 'Otro'
+            };
+            return genders[gender] || 'No especificado';
+        }
+        
+        function showNotification(message, type) {
+            // Crear notificación temporal
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remover después de 3 segundos
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        function editClient(clientId) {
+            alert(`Editando cliente ID: ${clientId}\n\nFuncionalidad en desarrollo...`);
+        }
+        
+        function viewProgress(clientId) {
+            alert(`Viendo progreso del cliente ID: ${clientId}\n\nFuncionalidad en desarrollo...`);
+        }
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('membershipFilter').addEventListener('change', applyFilters);
 
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase()
-        const filteredClients = clientes.filter(cliente => 
-            cliente.nombre.toLowerCase().includes(searchTerm) ||
-            cliente.email?.toLowerCase().includes(searchTerm) ||
-            cliente.telefono?.includes(searchTerm)
-        )
-        renderClientes(filteredClients)
-    })
-</script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Test connection and load clients
+            const connected = await testConnection();
+            if (connected) {
+                await loadClients();
+            }
+            
+            // Animate elements
+            anime({
+                targets: '.fade-in',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(150),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    window.location.href = href;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
