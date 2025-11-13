@@ -480,10 +480,10 @@
                         class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                     Cerrar
                 </button>
-                <button id="editClientBtn" onclick="editClient(currentClientId)" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                <button id="editClientBtn" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
                     <i class="fas fa-edit mr-2"></i>Editar Cliente
                 </button>
-                <button id="deleteClientBtn" onclick="deleteClient(currentClientId)" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                <button id="deleteClientBtn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
                     <i class="fas fa-trash mr-2"></i>Eliminar
                 </button>
             </div>
@@ -492,486 +492,614 @@
 
     <!-- Incluir el archivo supabase.js externo -->
     <script type="module">
-        // Importar desde el archivo externo supabase.js
-        import { ClientesService, testConnection, diagnosticarRLS } from './supabase.js';
-        
-        // Exportar al scope global para las funciones del HTML
-        window.ClientesService = ClientesService;
-        window.testConnection = testConnection;
-        window.diagnosticarRLS = diagnosticarRLS;
-        
-        // Variables globales
-        let allClients = [];
-        let currentClientId = null;
-        let isEditing = false;
+    // Importar desde el archivo externo supabase.js
+    import { ClientesService, testConnection, diagnosticarRLS } from './supabase.js';
+    
+    // Exportar al scope global para las funciones del HTML
+    window.ClientesService = ClientesService;
+    window.testConnection = testConnection;
+    window.diagnosticarRLS = diagnosticarRLS;
+    
+    // Variables globales
+    let allClients = [];
+    let currentClientId = null;
+    let isEditing = false;
 
-        // Cargar clientes desde Supabase - VERSIÓN SIMPLIFICADA
-        async function loadClients() {
-            try {
-                console.log('🔄 Cargando clientes...');
-                showLoadingState();
-                
-                const clients = await ClientesService.obtenerClientes();
-                console.log('📥 Clientes recibidos:', clients);
-                
-                allClients = clients;
-                renderClients(clients);
-                
-            } catch (error) {
-                console.error('❌ Error cargando clientes:', error);
-                
-                let errorMessage = error.message;
-                
-                showNotification('Error al cargar los clientes: ' + errorMessage, 'error');
-                
-                // Mostrar estado de error
-                const grid = document.getElementById('clientsGrid');
-                const loadingState = document.getElementById('loadingState');
-                const emptyState = document.getElementById('emptyState');
-                
-                loadingState.classList.add('hidden');
-                grid.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                emptyState.innerHTML = `
-                    <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-                    <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
-                    <p class="text-gray-500 mb-4">${errorMessage}</p>
-                    <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
-                        <i class="fas fa-redo mr-2"></i>Reintentar
-                    </button>
-                `;
-            }
+    // Cargar clientes desde Supabase - VERSIÓN SIMPLIFICADA
+    async function loadClients() {
+        try {
+            console.log('🔄 Cargando clientes...');
+            showLoadingState();
+            
+            const clients = await ClientesService.obtenerClientes();
+            console.log('📥 Clientes recibidos:', clients);
+            
+            allClients = clients;
+            renderClients(clients);
+            
+        } catch (error) {
+            console.error('❌ Error cargando clientes:', error);
+            
+            let errorMessage = error.message;
+            
+            showNotification('Error al cargar los clientes: ' + errorMessage, 'error');
+            
+            // Mostrar estado de error
+            const grid = document.getElementById('clientsGrid');
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            
+            loadingState.classList.add('hidden');
+            grid.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            emptyState.innerHTML = `
+                <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
+                <p class="text-gray-500 mb-4">${errorMessage}</p>
+                <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                    <i class="fas fa-redo mr-2"></i>Reintentar
+                </button>
+            `;
         }
+    }
 
-        // Modal functions
-        function openNewClientModal() {
-            isEditing = false;
-            document.getElementById('newClientModalTitle').textContent = 'Nuevo Cliente';
-            document.getElementById('submitButtonText').textContent = 'Guardar Cliente';
-            document.getElementById('editClientId').value = '';
-            
-            // Set default dates
-            const today = new Date().toISOString().split('T')[0];
-            document.querySelector('input[name="fecha_ingreso"]').value = today;
-            document.querySelector('input[name="proximo_pago"]').value = calculateNextPayment('mensualidad');
-            
-            document.getElementById('newClientModal').classList.remove('hidden');
-            document.getElementById('newClientModal').classList.add('flex');
+    // FUNCIÓN FALTANTE: Renderizar clientes en la grid
+    function renderClients(clients) {
+        const grid = document.getElementById('clientsGrid');
+        const loadingState = document.getElementById('loadingState');
+        const emptyState = document.getElementById('emptyState');
+        
+        loadingState.classList.add('hidden');
+        
+        if (!clients || clients.length === 0) {
+            grid.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            return;
         }
         
-        function closeNewClientModal() {
-            document.getElementById('newClientModal').classList.add('hidden');
-            document.getElementById('newClientModal').classList.remove('flex');
-            document.getElementById('newClientForm').reset();
-            isEditing = false;
-        }
-
-        // Client Details Modal
-        function openClientDetails(client) {
-            currentClientId = client.id;
-            const modal = document.getElementById('clientDetailsModal');
-            const content = document.getElementById('clientDetailsContent');
-            
-            content.innerHTML = `
-                <div>
-                    <div class="detail-item">
-                        <div class="detail-label">Nombre Completo</div>
-                        <div class="detail-value">${client.nombre}</div>
+        emptyState.classList.add('hidden');
+        grid.classList.remove('hidden');
+        
+        grid.innerHTML = clients.map(client => `
+            <div class="client-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="font-semibold text-blue-600">${getInitials(client.nombre)}</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">${client.nombre}</h3>
+                                <p class="text-sm text-gray-600">${client.email}</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(client.estado)}">
+                            ${getStatusText(client.estado)}
+                        </span>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Email</div>
-                        <div class="detail-value">${client.email}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Teléfono</div>
-                        <div class="detail-value">${client.telefono || 'No especificado'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Fecha de Nacimiento</div>
-                        <div class="detail-value">${formatDate(client.fecha_nacimiento)}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Sexo</div>
-                        <div class="detail-value">${getGenderText(client.genero)}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Ocupación</div>
-                        <div class="detail-value">${client.ocupacion || 'No especificada'}</div>
-                    </div>
-                </div>
-                <div>
-                    <div class="detail-item">
-                        <div class="detail-label">Experiencia en Ejercicio</div>
-                        <div class="detail-value">${client.experiencia_ejercicio ? 'Sí' : 'No'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Contacto Emergencia</div>
-                        <div class="detail-value">${client.contacto_emergencia || 'No especificado'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Tel. Emergencia</div>
-                        <div class="detail-value">${client.telefono_emergencia || 'No especificado'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Tipo de Membresía</div>
-                        <div class="detail-value">${formatMembershipType(client.membresia_tipo)}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Estado</div>
-                        <div class="detail-value">
-                            <span class="px-2 py-1 rounded-full text-xs ${getStatusClass(client.estado)}">
-                                ${getStatusText(client.estado)}
-                            </span>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-phone-alt w-4 mr-2"></i>
+                            <span>${client.telefono || 'No especificado'}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-calendar-alt w-4 mr-2"></i>
+                            <span>${formatMembershipType(client.membresia_tipo)}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-clock w-4 mr-2"></i>
+                            <span>Próximo pago: ${formatDate(client.proximo_pago)}</span>
                         </div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Fecha de Ingreso</div>
-                        <div class="detail-value">${formatDate(client.fecha_ingreso)}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Próximo Pago</div>
-                        <div class="detail-value">${formatDate(client.proximo_pago)}</div>
-                    </div>
-                </div>
-                ${client.alergias || client.condiciones_medicas || client.restricciones_medicas ? `
-                <div class="col-span-2">
-                    <div class="detail-item">
-                        <div class="detail-label">Alergias</div>
-                        <div class="detail-value">${client.alergias || 'Ninguna'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Condiciones Médicas</div>
-                        <div class="detail-value">${client.condiciones_medicas || 'Ninguna'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Restricciones Médicas</div>
-                        <div class="detail-value">${client.restricciones_medicas || 'Ninguna'}</div>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="openClientDetails(${JSON.stringify(client).replace(/"/g, '&quot;')})" 
+                                class="flex-1 bg-blue-500 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-eye mr-1"></i>Ver
+                        </button>
+                        <button onclick="viewProgress('${client.id}')" 
+                                class="flex-1 bg-green-500 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
+                            <i class="fas fa-chart-line mr-1"></i>Progreso
+                        </button>
                     </div>
                 </div>
-                ` : ''}
-            `;
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
+            </div>
+        `).join('');
+    }
+
+    // Modal functions
+    function openNewClientModal() {
+        isEditing = false;
+        document.getElementById('newClientModalTitle').textContent = 'Nuevo Cliente';
+        document.getElementById('submitButtonText').textContent = 'Guardar Cliente';
+        document.getElementById('editClientId').value = '';
         
-        function closeClientDetailsModal() {
-            document.getElementById('clientDetailsModal').classList.add('hidden');
-            document.getElementById('clientDetailsModal').classList.remove('flex');
-            currentClientId = null;
-        }
-
-        // Edit Client
-        async function editClient(clientId) {
-            try {
-                const client = allClients.find(c => c.id === clientId);
-                if (!client) {
-                    throw new Error('Cliente no encontrado');
-                }
-
-                isEditing = true;
-                currentClientId = clientId;
-                
-                document.getElementById('newClientModalTitle').textContent = 'Editar Cliente';
-                document.getElementById('submitButtonText').textContent = 'Actualizar Cliente';
-                document.getElementById('editClientId').value = clientId;
-
-                // Llenar el formulario con los datos del cliente
-                const form = document.getElementById('newClientForm');
-                form.nombre.value = client.nombre || '';
-                form.email.value = client.email || '';
-                form.telefono.value = client.telefono || '';
-                form.fecha_nacimiento.value = client.fecha_nacimiento || '';
-                form.genero.value = client.genero || '';
-                form.ocupacion.value = client.ocupacion || '';
-                form.experiencia_ejercicio.value = client.experiencia_ejercicio ? 'true' : 'false';
-                form.contacto_emergencia.value = client.contacto_emergencia || '';
-                form.telefono_emergencia.value = client.telefono_emergencia || '';
-                form.alergias.value = client.alergias || '';
-                form.condiciones_medicas.value = client.condiciones_medicas || '';
-                form.restricciones_medicas.value = client.restricciones_medicas || '';
-                form.membresia_tipo.value = client.membresia_tipo || '';
-                form.estado.value = client.estado || 'activa';
-                form.fecha_ingreso.value = client.fecha_ingreso || '';
-                form.proximo_pago.value = client.proximo_pago || '';
-                form.observaciones.value = client.observaciones || '';
-
-                closeClientDetailsModal();
-                openNewClientModal();
-            } catch (error) {
-                console.error('Error cargando datos del cliente:', error);
-                showNotification('Error al cargar datos del cliente: ' + error.message, 'error');
-            }
-        }
-
-        // Delete Client
-        async function deleteClient(clientId) {
-            if (!confirm('¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.')) {
-                return;
-            }
-
-            try {
-                await ClientesService.eliminarCliente(clientId);
-                showNotification('Cliente eliminado exitosamente', 'success');
-                closeClientDetailsModal();
-                await loadClients();
-            } catch (error) {
-                console.error('Error eliminando cliente:', error);
-                showNotification('Error al eliminar el cliente: ' + error.message, 'error');
-            }
-        }
-
-        // Form submission - VERSIÓN CORREGIDA Y COMPLETA
-        document.getElementById('newClientForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            console.log('=== INICIANDO GUARDADO ===');
-            
-            const submitButton = document.getElementById('submitButton');
-            const originalText = submitButton.innerHTML;
-            submitButton.innerHTML = '<div class="loading"></div> Procesando...';
-            submitButton.disabled = true;
-            
-            try {
-                // Get form data
-                const formData = new FormData(this);
-                const clientData = Object.fromEntries(formData);
-                const clientId = clientData.clientId;
-
-                console.log('📋 Datos del formulario:', clientData);
-                
-                // Preparar datos COMPATIBLES con la estructura de la tabla
-                const clientInfo = {
-                    nombre: clientData.nombre,
-                    email: clientData.email,
-                    telefono: clientData.telefono,
-                    fecha_nacimiento: clientData.fecha_nacimiento || null,
-                    genero: clientData.genero || null,
-                    ocupacion: clientData.ocupacion || null,
-                    experiencia_ejercicio: clientData.experiencia_ejercicio,
-                    contacto_emergencia: clientData.contacto_emergencia || null,
-                    telefono_emergencia: clientData.telefono_emergencia || null,
-                    alergias: clientData.alergias || null,
-                    condiciones_medicas: clientData.condiciones_medicas || null,
-                    restricciones_medicas: clientData.restricciones_medicas || null,
-                    membresia_tipo: clientData.membresia_tipo,
-                    estado: clientData.estado,
-                    fecha_ingreso: clientData.fecha_ingreso || new Date().toISOString().split('T')[0],
-                    proximo_pago: clientData.proximo_pago || calculateNextPayment(clientData.membresia_tipo),
-                    observaciones: clientData.observaciones || null
-                };
-
-                console.log('🎯 Datos preparados para Supabase:', clientInfo);
-
-                let savedClient;
-                if (isEditing && clientId) {
-                    console.log('✏️ Editando cliente existente...');
-                    savedClient = await ClientesService.actualizarCliente(clientId, clientInfo);
-                    showNotification('Cliente actualizado exitosamente!', 'success');
-                } else {
-                    console.log('🆕 Creando nuevo cliente...');
-                    savedClient = await ClientesService.crearCliente(clientInfo);
-                    showNotification('Cliente agregado exitosamente!', 'success');
-                }
-                
-                console.log('✅ Operación completada:', savedClient);
-                
-                // Recargar lista de clientes
-                await loadClients();
-                closeNewClientModal();
-                
-            } catch (error) {
-                console.error('❌ ERROR DETALLADO:', error);
-                console.error('📄 Stack trace:', error.stack);
-                showNotification('Error: ' + error.message, 'error');
-            } finally {
-                submitButton.innerHTML = originalText;
-                submitButton.disabled = false;
-                console.log('=== FINALIZADO ===');
-            }
-        });
-
-        // Filter functions
-        function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
-            const membershipFilter = document.getElementById('membershipFilter').value;
-            
-            const filteredClients = allClients.filter(client => {
-                const matchesSearch = 
-                    client.nombre.toLowerCase().includes(searchTerm) ||
-                    client.email.toLowerCase().includes(searchTerm) ||
-                    (client.telefono && client.telefono.includes(searchTerm));
-                
-                const matchesStatus = !statusFilter || (client.estado === statusFilter);
-                const matchesMembership = !membershipFilter || (client.membresia_tipo === membershipFilter);
-                
-                return matchesSearch && matchesStatus && matchesMembership;
-            });
-            
-            renderClients(filteredClients);
-        }
+        // Set default dates
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('input[name="fecha_ingreso"]').value = today;
+        document.querySelector('input[name="proximo_pago"]').value = calculateNextPayment('mensualidad');
         
-        function clearFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('membershipFilter').value = '';
-            renderClients(allClients);
-        }
+        document.getElementById('newClientModal').classList.remove('hidden');
+        document.getElementById('newClientModal').classList.add('flex');
+    }
+    
+    function closeNewClientModal() {
+        const modal = document.getElementById('newClientModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.getElementById('newClientForm').reset();
+        isEditing = false;
+        currentClientId = null;
+    }
 
-        // Helper functions
-        function calculateNextPayment(membershipType) {
-            const today = new Date();
-            switch(membershipType) {
-                case 'mensualidad':
-                    today.setMonth(today.getMonth() + 1);
-                    break;
-                case 'trimestral':
-                    today.setMonth(today.getMonth() + 3);
-                    break;
-                case 'semestral':
-                    today.setMonth(today.getMonth() + 6);
-                    break;
-                case 'anualidad':
-                    today.setFullYear(today.getFullYear() + 1);
-                    break;
-                default:
-                    today.setMonth(today.getMonth() + 1);
-            }
-            return today.toISOString().split('T')[0];
-        }
+    // Client Details Modal
+    function openClientDetails(client) {
+        currentClientId = client.id;
+        const modal = document.getElementById('clientDetailsModal');
+        const content = document.getElementById('clientDetailsContent');
         
-        function getInitials(name) {
-            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-        }
-        
-        function getGenderText(gender) {
-            const genders = {
-                'femenino': 'Femenino',
-                'masculino': 'Masculino',
-                'otro': 'Otro'
-            };
-            return genders[gender] || 'No especificado';
-        }
-
-        function formatMembershipType(type) {
-            const types = {
-                'mensualidad': 'Mensual',
-                'trimestral': 'Trimestral',
-                'semestral': 'Semestral',
-                'anualidad': 'Anual'
-            };
-            return types[type] || type;
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'No especificada';
-            return new Date(dateString).toLocaleDateString('es-ES');
-        }
-
-        function getStatusClass(status) {
-            const statusClass = {
-                activa: 'status-active',
-                inactiva: 'status-inactive',
-                vencida: 'status-expired',
-                pausada: 'status-paused'
-            };
-            return statusClass[status] || 'status-inactive';
-        }
-
-        function getStatusText(status) {
-            const statusText = {
-                activa: 'Activo',
-                inactiva: 'Inactivo',
-                vencida: 'Vencido',
-                pausada: 'Pausado'
-            };
-            return statusText[status] || status;
-        }
-
-        function showLoadingState() {
-            document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('clientsGrid').classList.add('hidden');
-            document.getElementById('emptyState').classList.add('hidden');
-        }
-        
-        function showNotification(message, type) {
-            // Crear notificación temporal
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-            }`;
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} mr-2"></i>
-                    <span>${message}</span>
+        content.innerHTML = `
+            <div>
+                <div class="detail-item">
+                    <div class="detail-label">Nombre Completo</div>
+                    <div class="detail-value">${client.nombre}</div>
                 </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Remover después de 3 segundos
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        function showConnectionStatus(type, message) {
-            const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.className = `p-4 rounded-lg mb-4 ${
-                type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
-                'bg-red-100 text-red-800 border border-red-200'
-            }`;
-            statusDiv.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-2"></i>
-                    <span>${message}</span>
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">${client.email}</div>
                 </div>
-            `;
-            statusDiv.classList.remove('hidden');
-        }
+                <div class="detail-item">
+                    <div class="detail-label">Teléfono</div>
+                    <div class="detail-value">${client.telefono || 'No especificado'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Fecha de Nacimiento</div>
+                    <div class="detail-value">${formatDate(client.fecha_nacimiento)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Sexo</div>
+                    <div class="detail-value">${getGenderText(client.genero)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Ocupación</div>
+                    <div class="detail-value">${client.ocupacion || 'No especificada'}</div>
+                </div>
+            </div>
+            <div>
+                <div class="detail-item">
+                    <div class="detail-label">Experiencia en Ejercicio</div>
+                    <div class="detail-value">${client.experiencia_ejercicio ? 'Sí' : 'No'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Contacto Emergencia</div>
+                    <div class="detail-value">${client.contacto_emergencia || 'No especificado'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Tel. Emergencia</div>
+                    <div class="detail-value">${client.telefono_emergencia || 'No especificado'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Tipo de Membresía</div>
+                    <div class="detail-value">${formatMembershipType(client.membresia_tipo)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Estado</div>
+                    <div class="detail-value">
+                        <span class="px-2 py-1 rounded-full text-xs ${getStatusClass(client.estado)}">
+                            ${getStatusText(client.estado)}
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Fecha de Ingreso</div>
+                    <div class="detail-value">${formatDate(client.fecha_ingreso)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Próximo Pago</div>
+                    <div class="detail-value">${formatDate(client.proximo_pago)}</div>
+                </div>
+            </div>
+            ${client.alergias || client.condiciones_medicas || client.restricciones_medicas ? `
+            <div class="col-span-2">
+                <div class="detail-item">
+                    <div class="detail-label">Alergias</div>
+                    <div class="detail-value">${client.alergias || 'Ninguna'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Condiciones Médicas</div>
+                    <div class="detail-value">${client.condiciones_medicas || 'Ninguna'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Restricciones Médicas</div>
+                    <div class="detail-value">${client.restricciones_medicas || 'Ninguna'}</div>
+                </div>
+            </div>
+            ` : ''}
+            ${client.observaciones ? `
+            <div class="col-span-2">
+                <div class="detail-item">
+                    <div class="detail-label">Observaciones</div>
+                    <div class="detail-value">${client.observaciones}</div>
+                </div>
+            </div>
+            ` : ''}
+        `;
         
-        function viewProgress(clientId) {
-            alert(`Viendo progreso del cliente ID: ${clientId}\n\nFuncionalidad en desarrollo...`);
-        }
-        
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('membershipFilter').addEventListener('change', applyFilters);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    
+    function closeClientDetailsModal() {
+        const modal = document.getElementById('clientDetailsModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        currentClientId = null;
+    }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Test connection and load clients
-            const connected = await testConnection();
-            if (connected) {
-                showConnectionStatus('success', 'Conectado a la base de datos');
-                await loadClients();
+    // FUNCIONES FALTANTES: Para los botones del modal de detalles
+    function editClientFromDetails() {
+        if (currentClientId) {
+            editClient(currentClientId);
+        }
+    }
+
+    function deleteClientFromDetails() {
+        if (currentClientId) {
+            deleteClient(currentClientId);
+        }
+    }
+
+    // Edit Client
+    async function editClient(clientId) {
+        try {
+            const client = allClients.find(c => c.id === clientId);
+            if (!client) {
+                throw new Error('Cliente no encontrado');
+            }
+
+            isEditing = true;
+            currentClientId = clientId;
+            
+            document.getElementById('newClientModalTitle').textContent = 'Editar Cliente';
+            document.getElementById('submitButtonText').textContent = 'Actualizar Cliente';
+            document.getElementById('editClientId').value = clientId;
+
+            // Llenar el formulario con los datos del cliente
+            const form = document.getElementById('newClientForm');
+            form.nombre.value = client.nombre || '';
+            form.email.value = client.email || '';
+            form.telefono.value = client.telefono || '';
+            form.fecha_nacimiento.value = client.fecha_nacimiento || '';
+            form.genero.value = client.genero || '';
+            form.ocupacion.value = client.ocupacion || '';
+            form.experiencia_ejercicio.value = client.experiencia_ejercicio ? 'true' : 'false';
+            form.contacto_emergencia.value = client.contacto_emergencia || '';
+            form.telefono_emergencia.value = client.telefono_emergencia || '';
+            form.alergias.value = client.alergias || '';
+            form.condiciones_medicas.value = client.condiciones_medicas || '';
+            form.restricciones_medicas.value = client.restricciones_medicas || '';
+            form.membresia_tipo.value = client.membresia_tipo || '';
+            form.estado.value = client.estado || 'activa';
+            form.fecha_ingreso.value = client.fecha_ingreso || '';
+            form.proximo_pago.value = client.proximo_pago || '';
+            form.observaciones.value = client.observaciones || '';
+
+            closeClientDetailsModal();
+            openNewClientModal();
+        } catch (error) {
+            console.error('Error cargando datos del cliente:', error);
+            showNotification('Error al cargar datos del cliente: ' + error.message, 'error');
+        }
+    }
+
+    // Delete Client
+    async function deleteClient(clientId) {
+        if (!confirm('¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        try {
+            await ClientesService.eliminarCliente(clientId);
+            showNotification('Cliente eliminado exitosamente', 'success');
+            closeClientDetailsModal();
+            await loadClients();
+        } catch (error) {
+            console.error('Error eliminando cliente:', error);
+            showNotification('Error al eliminar el cliente: ' + error.message, 'error');
+        }
+    }
+
+    // Form submission - VERSIÓN CORREGIDA Y COMPLETA
+    document.getElementById('newClientForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        console.log('=== INICIANDO GUARDADO ===');
+        
+        const submitButton = document.getElementById('submitButton');
+        const originalText = submitButton.innerHTML;
+        submitButton.innerHTML = '<div class="loading"></div> Procesando...';
+        submitButton.disabled = true;
+        
+        try {
+            // Get form data
+            const formData = new FormData(this);
+            const clientData = Object.fromEntries(formData);
+            const clientId = clientData.clientId;
+
+            console.log('📋 Datos del formulario:', clientData);
+            
+            // Preparar datos COMPATIBLES con la estructura de la tabla
+            const clientInfo = {
+                nombre: clientData.nombre,
+                email: clientData.email,
+                telefono: clientData.telefono,
+                fecha_nacimiento: clientData.fecha_nacimiento || null,
+                genero: clientData.genero || null,
+                ocupacion: clientData.ocupacion || null,
+                experiencia_ejercicio: clientData.experiencia_ejercicio,
+                contacto_emergencia: clientData.contacto_emergencia || null,
+                telefono_emergencia: clientData.telefono_emergencia || null,
+                alergias: clientData.alergias || null,
+                condiciones_medicas: clientData.condiciones_medicas || null,
+                restricciones_medicas: clientData.restricciones_medicas || null,
+                membresia_tipo: clientData.membresia_tipo,
+                estado: clientData.estado,
+                fecha_ingreso: clientData.fecha_ingreso || new Date().toISOString().split('T')[0],
+                proximo_pago: clientData.proximo_pago || calculateNextPayment(clientData.membresia_tipo),
+                observaciones: clientData.observaciones || null
+            };
+
+            console.log('🎯 Datos preparados para Supabase:', clientInfo);
+
+            let savedClient;
+            if (isEditing && clientId) {
+                console.log('✏️ Editando cliente existente...');
+                savedClient = await ClientesService.actualizarCliente(clientId, clientInfo);
+                showNotification('Cliente actualizado exitosamente!', 'success');
             } else {
-                showConnectionStatus('error', 'Error de conexión a la base de datos');
+                console.log('🆕 Creando nuevo cliente...');
+                savedClient = await ClientesService.crearCliente(clientInfo);
+                showNotification('Cliente agregado exitosamente!', 'success');
             }
             
-            // Animate elements
-            anime({
-                targets: '.fade-in',
-                translateY: [30, 0],
-                opacity: [0, 1],
-                delay: anime.stagger(150),
-                duration: 600,
-                easing: 'easeOutExpo'
-            });
+            console.log('✅ Operación completada:', savedClient);
+            
+            // Recargar lista de clientes
+            await loadClients();
+            closeNewClientModal();
+            
+        } catch (error) {
+            console.error('❌ ERROR DETALLADO:', error);
+            console.error('📄 Stack trace:', error.stack);
+            showNotification('Error: ' + error.message, 'error');
+        } finally {
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+            console.log('=== FINALIZADO ===');
+        }
+    });
+
+    // Filter functions
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const membershipFilter = document.getElementById('membershipFilter').value;
+        
+        const filteredClients = allClients.filter(client => {
+            const matchesSearch = 
+                client.nombre.toLowerCase().includes(searchTerm) ||
+                client.email.toLowerCase().includes(searchTerm) ||
+                (client.telefono && client.telefono.includes(searchTerm));
+            
+            const matchesStatus = !statusFilter || (client.estado === statusFilter);
+            const matchesMembership = !membershipFilter || (client.membresia_tipo === membershipFilter);
+            
+            return matchesSearch && matchesStatus && matchesMembership;
         });
         
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const href = this.getAttribute('href');
-                if (href && href !== '#') {
-                    window.location.href = href;
-                }
-            });
+        renderClients(filteredClients);
+    }
+    
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('membershipFilter').value = '';
+        renderClients(allClients);
+    }
+
+    // Helper functions
+    function calculateNextPayment(membershipType) {
+        const today = new Date();
+        switch(membershipType) {
+            case 'mensualidad':
+                today.setMonth(today.getMonth() + 1);
+                break;
+            case 'trimestral':
+                today.setMonth(today.getMonth() + 3);
+                break;
+            case 'semestral':
+                today.setMonth(today.getMonth() + 6);
+                break;
+            case 'anualidad':
+                today.setFullYear(today.getFullYear() + 1);
+                break;
+            default:
+                today.setMonth(today.getMonth() + 1);
+        }
+        return today.toISOString().split('T')[0];
+    }
+    
+    function getInitials(name) {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+    
+    function getGenderText(gender) {
+        const genders = {
+            'femenino': 'Femenino',
+            'masculino': 'Masculino',
+            'otro': 'Otro'
+        };
+        return genders[gender] || 'No especificado';
+    }
+
+    function formatMembershipType(type) {
+        const types = {
+            'mensualidad': 'Mensual',
+            'trimestral': 'Trimestral',
+            'semestral': 'Semestral',
+            'anualidad': 'Anual'
+        };
+        return types[type] || type;
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'No especificada';
+        return new Date(dateString).toLocaleDateString('es-ES');
+    }
+
+    function getStatusClass(status) {
+        const statusClass = {
+            activa: 'status-active',
+            inactiva: 'status-inactive',
+            vencida: 'status-expired',
+            pausada: 'status-paused'
+        };
+        return statusClass[status] || 'status-inactive';
+    }
+
+    function getStatusText(status) {
+        const statusText = {
+            activa: 'Activo',
+            inactiva: 'Inactivo',
+            vencida: 'Vencido',
+            pausada: 'Pausado'
+        };
+        return statusText[status] || status;
+    }
+
+    function showLoadingState() {
+        document.getElementById('loadingState').classList.remove('hidden');
+        document.getElementById('clientsGrid').classList.add('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+    }
+    
+    function showNotification(message, type) {
+        // Crear notificación temporal
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+            type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remover después de 3 segundos
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+    
+    function showConnectionStatus(type, message) {
+        const statusDiv = document.getElementById('connectionStatus');
+        statusDiv.className = `p-4 rounded-lg mb-4 ${
+            type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
+            'bg-red-100 text-red-800 border border-red-200'
+        }`;
+        statusDiv.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        statusDiv.classList.remove('hidden');
+    }
+    
+    function viewProgress(clientId) {
+        alert(`Viendo progreso del cliente ID: ${clientId}\n\nFuncionalidad en desarrollo...`);
+    }
+    
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('membershipFilter').addEventListener('change', applyFilters);
+
+    // INICIALIZACIÓN COMPLETA CON EVENT LISTENERS FALTANTES
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Test connection and load clients
+        const connected = await testConnection();
+        if (connected) {
+            showConnectionStatus('success', 'Conectado a la base de datos');
+            await loadClients();
+        } else {
+            showConnectionStatus('error', 'Error de conexión a la base de datos');
+        }
+        
+        // Asignar las funciones correctas a los botones del modal de detalles
+        document.getElementById('editClientBtn').addEventListener('click', editClientFromDetails);
+        document.getElementById('deleteClientBtn').addEventListener('click', deleteClientFromDetails);
+        
+        // Cerrar modales al hacer click fuera del contenido
+        document.getElementById('newClientModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeNewClientModal();
+            }
         });
-    </script>
+        
+        document.getElementById('clientDetailsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeClientDetailsModal();
+            }
+        });
+        
+        // Cerrar modales con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeNewClientModal();
+                closeClientDetailsModal();
+            }
+        });
+        
+        // Animate elements
+        anime({
+            targets: '.fade-in',
+            translateY: [30, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(150),
+            duration: 600,
+            easing: 'easeOutExpo'
+        });
+    });
+    
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (href && href !== '#') {
+                window.location.href = href;
+            }
+        });
+    });
+
+    // Exportar funciones al scope global para que estén disponibles en los onclick
+    window.openNewClientModal = openNewClientModal;
+    window.closeNewClientModal = closeNewClientModal;
+    window.openClientDetails = openClientDetails;
+    window.closeClientDetailsModal = closeClientDetailsModal;
+    window.editClientFromDetails = editClientFromDetails;
+    window.deleteClientFromDetails = deleteClientFromDetails;
+    window.editClient = editClient;
+    window.deleteClient = deleteClient;
+    window.applyFilters = applyFilters;
+    window.clearFilters = clearFilters;
+    window.viewProgress = viewProgress;
+    window.loadClients = loadClients;
+</script>
 </body>
 </html>
