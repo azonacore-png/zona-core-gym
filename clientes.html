@@ -586,27 +586,27 @@
         // Cargar clientes desde Supabase - VERSIÓN CORREGIDA
         async function loadClients() {
             try {
-                console.log('🔄 Cargando clientes...')
-                showLoadingState()
+                console.log('🔄 Cargando clientes...');
+                showLoadingState();
                 
-                const clients = await ClientesService.obtenerClientes()
-                console.log('📥 Clientes recibidos:', clients)
+                const clients = await ClientesService.obtenerClientes();
+                console.log('📥 Clientes recibidos:', clients);
                 
-                allClients = clients
-                renderClients(clients)
+                allClients = clients;
+                renderClients(clients);
                 
             } catch (error) {
-                console.error('❌ Error cargando clientes:', error)
-                showNotification('Error al cargar los clientes: ' + error.message, 'error')
+                console.error('❌ Error cargando clientes:', error);
+                showNotification('Error al cargar los clientes: ' + error.message, 'error');
                 
                 // Mostrar estado vacío si hay error
-                const grid = document.getElementById('clientsGrid')
-                const loadingState = document.getElementById('loadingState')
-                const emptyState = document.getElementById('emptyState')
+                const grid = document.getElementById('clientsGrid');
+                const loadingState = document.getElementById('loadingState');
+                const emptyState = document.getElementById('emptyState');
                 
-                loadingState.classList.add('hidden')
-                grid.classList.add('hidden')
-                emptyState.classList.remove('hidden')
+                loadingState.classList.add('hidden');
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
                 emptyState.innerHTML = `
                     <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
                     <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
@@ -614,7 +614,7 @@
                     <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
                         <i class="fas fa-redo mr-2"></i>Reintentar
                     </button>
-                `
+                `;
             }
         }
 
@@ -796,22 +796,75 @@
             }
         }
 
-       -- Política para permitir todo a los administradores (desde cualquier origen)
-CREATE POLICY "Permitir todas las operaciones" ON "public"."clientes"
-FOR ALL USING (true);
+        // Form submission - VERSIÓN CORREGIDA Y COMPLETA
+        document.getElementById('newClientForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            console.log('=== INICIANDO GUARDADO ===');
+            
+            const submitButton = document.getElementById('submitButton');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<div class="loading"></div> Procesando...';
+            submitButton.disabled = true;
+            
+            try {
+                // Get form data
+                const formData = new FormData(this);
+                const clientData = Object.fromEntries(formData);
+                const clientId = clientData.clientId;
 
--- O si prefieres políticas más específicas:
-CREATE POLICY "Permitir inserción" ON "public"."clientes"
-FOR INSERT WITH CHECK (true);
+                console.log('📋 Datos del formulario:', clientData);
+                
+                // Preparar datos COMPATIBLES con la estructura de la tabla
+                const clientInfo = {
+                    nombre: clientData.nombre,
+                    email: clientData.email,
+                    telefono: clientData.telefono,
+                    fecha_nacimiento: clientData.fecha_nacimiento || null,
+                    genero: clientData.genero || null,
+                    ocupacion: clientData.ocupacion || null,
+                    experiencia_ejercicio: clientData.experiencia_ejercicio,
+                    contacto_emergencia: clientData.contacto_emergencia || null,
+                    telefono_emergencia: clientData.telefono_emergencia || null,
+                    alergias: clientData.alergias || null,
+                    condiciones_medicas: clientData.condiciones_medicas || null,
+                    restricciones_medicas: clientData.restricciones_medicas || null,
+                    membresia_tipo: clientData.membresia_tipo,
+                    estado: clientData.estado,
+                    fecha_ingreso: clientData.fecha_ingreso || new Date().toISOString().split('T')[0],
+                    proximo_pago: clientData.proximo_pago || calculateNextPayment(clientData.membresia_tipo),
+                    observaciones: clientData.observaciones || null
+                };
 
-CREATE POLICY "Permitir selección" ON "public"."clientes"
-FOR SELECT USING (true);
+                console.log('🎯 Datos preparados para Supabase:', clientInfo);
 
-CREATE POLICY "Permitir actualización" ON "public"."clientes"
-FOR UPDATE USING (true);
-
-CREATE POLICY "Permitir eliminación" ON "public"."clientes"
-FOR DELETE USING (true);
+                let savedClient;
+                if (isEditing && clientId) {
+                    console.log('✏️ Editando cliente existente...');
+                    savedClient = await ClientesService.actualizarCliente(clientId, clientInfo);
+                    showNotification('Cliente actualizado exitosamente!', 'success');
+                } else {
+                    console.log('🆕 Creando nuevo cliente...');
+                    savedClient = await ClientesService.crearCliente(clientInfo);
+                    showNotification('Cliente agregado exitosamente!', 'success');
+                }
+                
+                console.log('✅ Operación completada:', savedClient);
+                
+                // Recargar lista de clientes
+                await loadClients();
+                closeNewClientModal();
+                
+            } catch (error) {
+                console.error('❌ ERROR DETALLADO:', error);
+                console.error('📄 Stack trace:', error.stack);
+                showNotification('Error: ' + error.message, 'error');
+            } finally {
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+                console.log('=== FINALIZADO ===');
+            }
+        });
 
         // Filter functions
         function applyFilters() {
