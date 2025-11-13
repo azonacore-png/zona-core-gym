@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progreso - ZONA CORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #2A5B8A;
+            --neutral-gray: #5A5A5A;
+            --accent-orange: #FF7A3C;
+            --light-gray: #F8F9FA;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-blue) 0%, #1e3a5f 100%);
+            backdrop-filter: blur(10px);
+        }
+        
+        .main-content {
+            background: var(--light-gray);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #ff6b2b 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 122, 60, 0.3);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 122, 60, 0.2);
+            border-left: 4px solid var(--accent-orange);
+        }
+        
+        .progress-card {
+            transition: all 0.3s ease;
+        }
+        
+        .progress-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .measurement-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .measurement-input:focus {
+            background: white;
+            border-color: var(--accent-orange);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<script src="js/backup.js"></script>
+
+<body>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 text-white p-6 flex flex-col">
+            <div class="mb-8">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dumbbell text-2xl" style="color: var(--primary-blue);"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">ZONA CORE</h1>
+                        <p class="text-sm opacity-80">Admin Panel</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 space-y-2">
+                <a href="index.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="clientes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="pagos.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pagos</span>
+                </a>
+                <a href="clases.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Clases</span>
+                </a>
+                <a href="#" class="nav-item active flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progreso</span>
+                </a>
+                <a href="ejercicios.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-book"></i>
+                    <span>Biblioteca</span>
+                </a>
+                <a href="reportes.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="configuracion.html" class="nav-item flex items-center space-x-3 p-3 text-sm font-medium">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+            
+            <div class="mt-auto">
+                <div class="bg-white bg-opacity-10 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium">Administrador</p>
+                            <p class="text-xs opacity-80">ZONA CORE</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Seguimiento de Progreso</h2>
+                        <p class="text-gray-600">Monitorea el progreso físico de los clientes</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <select id="clientSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Seleccionar cliente</option>
+                            <option value="1">María José Rodríguez</option>
+                            <option value="2">Ana Carolina Martínez</option>
+                            <option value="3">Lucía Fernández</option>
+                            <option value="4">Camila González</option>
+                        </select>
+                        <button onclick="openProgressModal()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-plus mr-2"></i>Nueva Medición
+                        </button>
+                        <div class="relative">
+                            <button class="p-2 text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Progress Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in">
+                    <div class="progress-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">Peso Actual</p>
+                                <p class="text-3xl font-bold text-gray-800">65.2 kg</p>
+                                <p class="text-green-600 text-sm mt-1">
+                                    <i class="fas fa-arrow-down mr-1"></i>-2.3 kg
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-weight text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">% Grasa Corporal</p>
+                                <p class="text-3xl font-bold text-gray-800">22.4%</p>
+                                <p class="text-green-600 text-sm mt-1">
+                                    <i class="fas fa-arrow-down mr-1"></i>-1.8%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-percentage text-orange-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">Masa Muscular</p>
+                                <p class="text-3xl font-bold text-gray-800">47.8%</p>
+                                <p class="text-blue-600 text-sm mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>+2.1%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dumbbell text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card card rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm font-medium">IMC</p>
+                                <p class="text-3xl font-bold text-gray-800">23.1</p>
+                                <p class="text-green-600 text-sm mt-1">
+                                    <i class="fas fa-check mr-1"></i>Normal
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calculator text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Evolución del Peso</h3>
+                        <div id="weightChart" style="height: 300px;"></div>
+                    </div>
+                    
+                    <div class="card rounded-xl p-6 fade-in">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Composición Corporal</h3>
+                        <div id="compositionChart" style="height: 300px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Measurements and 1RM -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Body Measurements -->
+                    <div class="card rounded-xl p-6 fade-in">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Medidas Corporales</h3>
+                            <button onclick="openMeasurementModal()" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
+                                <i class="fas fa-ruler mr-2"></i>Nueva Medida
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-ruler text-blue-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Cintura</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-semibold">72 cm</span>
+                                    <span class="text-green-600 text-sm block">-3 cm</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-ruler text-pink-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Cadera</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-semibold">95 cm</span>
+                                    <span class="text-green-600 text-sm block">-2 cm</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-ruler text-purple-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Muslo</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-semibold">58 cm</span>
+                                    <span class="text-blue-600 text-sm block">+1 cm</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-ruler text-green-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-medium">Brazo</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-semibold">28 cm</span>
+                                    <span class="text-blue-600 text-sm block">+0.5 cm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 1RM Calculator -->
+                    <div class="card rounded-xl p-6 fade-in">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Calculadora 1RM</h3>
+                            <button onclick="calculate1RM()" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200">
+                                <i class="fas fa-calculator mr-2"></i>Calcular
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                                    <input type="number" id="weight1RM" placeholder="80" 
+                                           class="measurement-input w-full px-4 py-2 rounded-lg focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Repeticiones</label>
+                                    <input type="number" id="reps1RM" placeholder="5" 
+                                           class="measurement-input w-full px-4 py-2 rounded-lg focus:outline-none">
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-blue-800 mb-2">Resultados:</h4>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-blue-600">1RM:</span>
+                                        <span class="font-semibold ml-2" id="result1RM">97.5 kg</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-blue-600">% Carga:</span>
+                                        <span class="font-semibold ml-2" id="resultPercentage">82%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 1RM Table -->
+                            <div class="mt-4">
+                                <h4 class="font-semibold text-gray-800 mb-2">Tabla de Equivalencias</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="border-b border-gray-200">
+                                                <th class="text-left py-2">Reps</th>
+                                                <th class="text-left py-2">% 1RM</th>
+                                                <th class="text-left py-2">Peso</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rmTableBody">
+                                            <!-- Table rows will be generated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Progress Measurement Modal -->
+    <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Nueva Medición</h3>
+                <button onclick="closeProgressModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="progressForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                        <input type="number" name="weight" step="0.1" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">% Grasa Corporal</label>
+                        <input type="number" name="bodyFat" step="0.1" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">% Masa Muscular</label>
+                        <input type="number" name="muscleMass" step="0.1" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                        <input type="date" name="measurementDate" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-4">Medidas Corporales (cm)</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cintura</label>
+                            <input type="number" name="waist" step="0.1" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cadera</label>
+                            <input type="number" name="hip" step="0.1" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Muslo</label>
+                            <input type="number" name="thigh" step="0.1" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Brazo</label>
+                            <input type="number" name="arm" step="0.1" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notas</label>
+                    <textarea name="notes" rows="3" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Observaciones adicionales..."></textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-4 pt-6">
+                    <button type="button" onclick="closeProgressModal()" 
+                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-save mr-2"></i>Guardar Medición
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Weight Chart
+            const weightChart = echarts.init(document.getElementById('weightChart'));
+            const weightOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun']
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 60,
+                    max: 70,
+                    axisLabel: {
+                        formatter: '{value} kg'
+                    }
+                },
+                series: [{
+                    name: 'Peso',
+                    type: 'line',
+                    smooth: true,
+                    lineStyle: {
+                        width: 3,
+                        color: '#2A5B8A'
+                    },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                {offset: 0, color: 'rgba(42, 91, 138, 0.3)'},
+                                {offset: 1, color: 'rgba(42, 91, 138, 0.05)'}
+                            ]
+                        }
+                    },
+                    data: [67.5, 66.8, 66.2, 65.9, 65.5, 65.2]
+                }]
+            };
+            weightChart.setOption(weightOption);
+            
+            // Composition Chart
+            const compositionChart = echarts.init(document.getElementById('compositionChart'));
+            const compositionOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c}% ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data: ['Masa Muscular', 'Grasa Corporal', 'Huesos/Órganos', 'Agua']
+                },
+                series: [{
+                    name: 'Composición',
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '18',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    data: [
+                        {value: 47.8, name: 'Masa Muscular', itemStyle: {color: '#2A5B8A'}},
+                        {value: 22.4, name: 'Grasa Corporal', itemStyle: {color: '#FF7A3C'}},
+                        {value: 15.3, name: 'Huesos/Órganos', itemStyle: {color: '#5A5A5A'}},
+                        {value: 14.5, name: 'Agua', itemStyle: {color: '#54A0FF'}}
+                    ]
+                }]
+            };
+            compositionChart.setOption(compositionOption);
+            
+            // Generate 1RM table
+            generateRMTable();
+            
+            // Set today's date as default
+            document.querySelector('input[name="measurementDate"]').value = new Date().toISOString().split('T')[0];
+            
+            // Animate elements
+            anime({
+                targets: '.fade-in',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(150),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+        
+        // 1RM Calculator
+        function calculate1RM() {
+            const weight = parseFloat(document.getElementById('weight1RM').value);
+            const reps = parseInt(document.getElementById('reps1RM').value);
+            
+            if (!weight || !reps) {
+                alert('Por favor ingresa peso y repeticiones');
+                return;
+            }
+            
+            // Using Brzycki formula: 1RM = weight × (36 / (37 - reps))
+            const oneRM = weight * (36 / (37 - reps));
+            const percentage = Math.round((weight / oneRM) * 100);
+            
+            document.getElementById('result1RM').textContent = oneRM.toFixed(1) + ' kg';
+            document.getElementById('resultPercentage').textContent = percentage + '%';
+            
+            generateRMTable(oneRM);
+        }
+        
+        function generateRMTable(base1RM = 97.5) {
+            const tableBody = document.getElementById('rmTableBody');
+            tableBody.innerHTML = '';
+            
+            const rmPercentages = [
+                {reps: 1, percent: 100},
+                {reps: 2, percent: 95},
+                {reps: 3, percent: 90},
+                {reps: 4, percent: 86},
+                {reps: 5, percent: 82},
+                {reps: 6, percent: 78},
+                {reps: 7, percent: 74},
+                {reps: 8, percent: 70},
+                {reps: 9, percent: 65},
+                {reps: 10, percent: 61},
+                {reps: 11, percent: 57},
+                {reps: 12, percent: 53}
+            ];
+            
+            rmPercentages.forEach(item => {
+                const weight = (base1RM * item.percent / 100).toFixed(1);
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100';
+                row.innerHTML = `
+                    <td class="py-2">${item.reps}</td>
+                    <td class="py-2">${item.percent}%</td>
+                    <td class="py-2 font-semibold">${weight} kg</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Modal functions
+        function openProgressModal() {
+            document.getElementById('progressModal').classList.remove('hidden');
+            document.getElementById('progressModal').classList.add('flex');
+        }
+        
+        function closeProgressModal() {
+            document.getElementById('progressModal').classList.add('hidden');
+            document.getElementById('progressModal').classList.remove('flex');
+            document.getElementById('progressForm').reset();
+        }
+        
+        function openMeasurementModal() {
+            openProgressModal();
+        }
+        
+        // Form submission
+        document.getElementById('progressForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const progressData = Object.fromEntries(formData);
+            
+            // In a real app, send to server
+            console.log('Progress data:', progressData);
+            
+            closeProgressModal();
+            alert('Medición guardada exitosamente!');
+        });
+        
+        // Client selection
+        document.getElementById('clientSelect').addEventListener('change', function(e) {
+            if (e.target.value) {
+                // In a real app, load client data
+                console.log('Loading client data for ID:', e.target.value);
+            }
+        });
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    window.location.href = href;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
