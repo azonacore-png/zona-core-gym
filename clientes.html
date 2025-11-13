@@ -493,7 +493,7 @@
     <!-- Incluir el archivo supabase.js externo -->
     <script type="module">
         // Importar desde el archivo externo supabase.js
-        import { ClientesService, testConnection } from './supabase.js';
+        import { ClientesService, testConnection, diagnosticarRLS } from './supabase.js';
         
         // Exportar al scope global para las funciones del HTML
         window.ClientesService = ClientesService;
