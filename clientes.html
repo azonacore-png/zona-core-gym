@@ -583,16 +583,38 @@
             });
         }
 
-        // Cargar clientes desde Supabase
+        // Cargar clientes desde Supabase - VERSIÓN CORREGIDA
         async function loadClients() {
             try {
-                showLoadingState();
-                const clients = await ClientesService.obtenerClientes();
-                allClients = clients;
-                renderClients(clients);
+                console.log('🔄 Cargando clientes...')
+                showLoadingState()
+                
+                const clients = await ClientesService.obtenerClientes()
+                console.log('📥 Clientes recibidos:', clients)
+                
+                allClients = clients
+                renderClients(clients)
+                
             } catch (error) {
-                console.error('Error cargando clientes:', error);
-                showNotification('Error al cargar los clientes: ' + error.message, 'error');
+                console.error('❌ Error cargando clientes:', error)
+                showNotification('Error al cargar los clientes: ' + error.message, 'error')
+                
+                // Mostrar estado vacío si hay error
+                const grid = document.getElementById('clientsGrid')
+                const loadingState = document.getElementById('loadingState')
+                const emptyState = document.getElementById('emptyState')
+                
+                loadingState.classList.add('hidden')
+                grid.classList.add('hidden')
+                emptyState.classList.remove('hidden')
+                emptyState.innerHTML = `
+                    <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">Error al cargar clientes</h3>
+                    <p class="text-gray-500 mb-4">${error.message}</p>
+                    <button onclick="loadClients()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-redo mr-2"></i>Reintentar
+                    </button>
+                `
             }
         }
 
