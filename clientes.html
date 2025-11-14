@@ -825,9 +825,11 @@
             // Get form data
             const formData = new FormData(this);
             const clientData = Object.fromEntries(formData);
-            const clientId = clientData.clientId;
-
+            const clientId = document.getElementById('editClientId').value; // CORREGIDO: obtener del campo hidden
+    
             console.log('📋 Datos del formulario:', clientData);
+            console.log('🆔 ID del cliente (edición):', clientId);
+            console.log('✏️ Modo edición:', isEditing);
             
             // Preparar datos COMPATIBLES con la estructura de la tabla
             const clientInfo = {
@@ -837,7 +839,7 @@
                 fecha_nacimiento: clientData.fecha_nacimiento || null,
                 genero: clientData.genero || null,
                 ocupacion: clientData.ocupacion || null,
-                experiencia_ejercicio: clientData.experiencia_ejercicio,
+                experiencia_ejercicio: clientData.experiencia_ejercicio === 'true',
                 contacto_emergencia: clientData.contacto_emergencia || null,
                 telefono_emergencia: clientData.telefono_emergencia || null,
                 alergias: clientData.alergias || null,
@@ -873,12 +875,101 @@
             console.error('❌ ERROR DETALLADO:', error);
             console.error('📄 Stack trace:', error.stack);
             showNotification('Error: ' + error.message, 'error');
+
+        // Manejar error específico de duplicado de email
+        if (error.message.includes('duplicate key value violates unique constraint "clientes_email_key"')) {
+            showNotification('Error: Ya existe un cliente con ese email. Use un email diferente.', 'error');
+        } else {
+            showNotification('Error: ' + error.message, 'error');
+            
         } finally {
             submitButton.innerHTML = originalText;
             submitButton.disabled = false;
             console.log('=== FINALIZADO ===');
         }
     });
+
+    // CORREGIR también la función editClient para asegurar que el ID se establezca correctamente
+    async function editClient(clientId) {
+        try {
+            const client = allClients.find(c => c.id === clientId);
+            if (!client) {
+                throw new Error('Cliente no encontrado');
+            }
+    
+            isEditing = true;
+            currentClientId = clientId;
+            
+            document.getElementById('newClientModalTitle').textContent = 'Editar Cliente';
+            document.getElementById('submitButtonText').textContent = 'Actualizar Cliente';
+            document.getElementById('editClientId').value = clientId; // ESTA LÍNEA ES CLAVE
+    
+            console.log('🔧 Editando cliente ID:', clientId);
+            console.log('📧 Email del cliente:', client.email);
+    
+            // Llenar el formulario con los datos del cliente
+            const form = document.getElementById('newClientForm');
+            form.nombre.value = client.nombre || '';
+            form.email.value = client.email || '';
+            form.telefono.value = client.telefono || '';
+            form.fecha_nacimiento.value = client.fecha_nacimiento || '';
+            form.genero.value = client.genero || '';
+            form.ocupacion.value = client.ocupacion || '';
+            
+            // CORREGIR: Establecer el radio button correctamente
+            const experienciaValue = client.experiencia_ejercicio ? 'true' : 'false';
+            document.querySelector(`input[name="experiencia_ejercicio"][value="${experienciaValue}"]`).checked = true;
+            
+            form.contacto_emergencia.value = client.contacto_emergencia || '';
+            form.telefono_emergencia.value = client.telefono_emergencia || '';
+            form.alergias.value = client.alergias || '';
+            form.condiciones_medicas.value = client.condiciones_medicas || '';
+            form.restricciones_medicas.value = client.restricciones_medicas || '';
+            form.membresia_tipo.value = client.membresia_tipo || '';
+            form.estado.value = client.estado || 'activa';
+            form.fecha_ingreso.value = client.fecha_ingreso || '';
+            form.proximo_pago.value = client.proximo_pago || '';
+            form.observaciones.value = client.observaciones || '';
+    
+            closeClientDetailsModal();
+            openNewClientModal();
+        } catch (error) {
+            console.error('Error cargando datos del cliente:', error);
+            showNotification('Error al cargar datos del cliente: ' + error.message, 'error');
+        }
+    }
+    
+    // AGREGAR validación de email único antes de guardar
+    async function validateUniqueEmail(email, currentClientId = null) {
+        try {
+            const clients = await ClientesService.obtenerClientes();
+            const existingClient = clients.find(client => 
+                client.email === email && client.id !== currentClientId
+            );
+            return !existingClient; // Retorna true si el email es único
+        } catch (error) {
+            console.error('Error validando email:', error);
+            return true; // En caso de error, permitir el guardado
+        }
+    }
+
+        // AGREGAR validación en tiempo real para email
+        document.querySelector('input[name="email"]').addEventListener('blur', async function() {
+            const email = this.value;
+            const clientId = document.getElementById('editClientId').value;
+            
+            if (email && clientId) {
+                // Solo validar si estamos editando y el email ha cambiado
+                const client = allClients.find(c => c.id === clientId);
+                if (client && client.email !== email) {
+                    const isUnique = await validateUniqueEmail(email, clientId);
+                    if (!isUnique) {
+                        showNotification('Este email ya está en uso por otro cliente', 'error');
+                        this.focus();
+                    }
+                }
+            }
+        });
 
     // Filter functions
     function applyFilters() {
