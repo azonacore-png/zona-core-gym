@@ -13,9 +13,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     router.push('/login')
   }
 
-  if (!user || role === 'loading') return <div className="p-4">Cargando...</div>
+  if (!user || role === 'loading') return <div className="p-4 text-center">Cargando...</div>
 
-  const links: { label: string; href: string }[] =
+  const links =
     role === 'admin'
       ? [
           { label: 'Dashboard', href: '/admin' },
@@ -36,18 +36,31 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <aside className="w-64 bg-[#2A5B8A] text-white p-4">
-        <h1 className="text-xl font-bold mb-6">ZONA CORE</h1>
-        <nav className="space-y-2">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} className="block hover:underline">
-              {l.label}
+      <aside className="w-64 bg-[#2A5B8A] text-white p-4 flex flex-col">
+        <h1 className="text-xl font-bold mb-8">ZONA CORE</h1>
+        <nav className="space-y-2 flex-1">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`block px-3 py-2 rounded-lg hover:bg-[#1E4A6E] transition-colors ${
+                router.pathname === link.href ? 'bg-[#1E4A6E]' : ''
+              }`}
+            >
+              {link.label}
             </Link>
           ))}
-          <button onClick={signOut} className="mt-6 text-sm underline">Cerrar sesión</button>
         </nav>
+        <button
+          onClick={signOut}
+          className="mt-4 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors w-full"
+        >
+          Cerrar sesión
+        </button>
       </aside>
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 p-6">
+        {children}
+      </main>
     </div>
   )
 }
