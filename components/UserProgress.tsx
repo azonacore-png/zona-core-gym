@@ -12,15 +12,21 @@ export default function UserProgress({ userEmail }: { userEmail: string }) {
   }, [userEmail])
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-2">Mi Progreso</h2>
-      <ul className="bg-white rounded shadow divide-y">
-        {rows.map((p) => (
-          <li key={p.id} className="p-3">
-            {p.date} – Peso: {p.weight_kg} kg – Grasa: {p.body_fat_pct} %
-          </li>
-        ))}
-      </ul>
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Mi Progreso</h2>
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <ul className="divide-y divide-gray-200">
+          {rows.map((p) => (
+            <li key={p.id} className="py-3">
+              <p className="font-medium">{new Date(p.date).toLocaleDateString()}</p>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Peso: {p.weight_kg} kg</span>
+                <span className="text-sm text-gray-600">Grasa: {p.body_fat_pct}%</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
