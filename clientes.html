@@ -811,48 +811,49 @@
     }
 
     // Form submission - VERSIÓN CORREGIDA Y COMPLETA
-    document.getElementById('newClientForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        console.log('=== INICIANDO GUARDADO ===');
-        
-        const submitButton = document.getElementById('submitButton');
-        const originalText = submitButton.innerHTML;
-        submitButton.innerHTML = '<div class="loading"></div> Procesando...';
-        submitButton.disabled = true;
-        
-        try {
-            // Get form data
-            const formData = new FormData(this);
-            const clientData = Object.fromEntries(formData);
-            const clientId = document.getElementById('editClientId').value; // CORREGIDO: obtener del campo hidden
+    // La función de envío del formulario - VERSIÓN CORREGIDA
+document.getElementById('newClientForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-            console.log('📋 Datos del formulario:', clientData);
-            console.log('🆔 ID del cliente (edición):', clientId);
-            console.log('✏️ Modo edición:', isEditing);
-            
-            // Preparar datos COMPATIBLES con la estructura de la tabla
-            const clientInfo = {
-                nombre: clientData.nombre,
-                email: clientData.email,
-                telefono: clientData.telefono,
-                fecha_nacimiento: clientData.fecha_nacimiento || null,
-                genero: clientData.genero || null,
-                ocupacion: clientData.ocupacion || null,
-                experiencia_ejercicio: clientData.experiencia_ejercicio === 'true',
-                contacto_emergencia: clientData.contacto_emergencia || null,
-                telefono_emergencia: clientData.telefono_emergencia || null,
-                alergias: clientData.alergias || null,
-                condiciones_medicas: clientData.condiciones_medicas || null,
-                restricciones_medicas: clientData.restricciones_medicas || null,
-                membresia_tipo: clientData.membresia_tipo,
-                estado: clientData.estado,
-                fecha_ingreso: clientData.fecha_ingreso || new Date().toISOString().split('T')[0],
-                proximo_pago: clientData.proximo_pago || calculateNextPayment(clientData.membresia_tipo),
-                observaciones: clientData.observaciones || null
-            };
+    console.log('=== INICIANDO GUARDADO ===');
+    
+    const submitButton = document.getElementById('submitButton');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<div class="loading"></div> Procesando...';
+    submitButton.disabled = true;
+    
+    try {
+        // Get form data
+        const formData = new FormData(this);
+        const clientData = Object.fromEntries(formData);
+        const clientId = document.getElementById('editClientId').value; // CORREGIDO: obtener del campo hidden
 
-                    console.log('🎯 Datos preparados para Supabase:', clientInfo);
+        console.log('📋 Datos del formulario:', clientData);
+        console.log('🆔 ID del cliente (edición):', clientId);
+        console.log('✏️ Modo edición:', isEditing);
+        
+        // Preparar datos COMPATIBLES con la estructura de la tabla
+        const clientInfo = {
+            nombre: clientData.nombre,
+            email: clientData.email,
+            telefono: clientData.telefono,
+            fecha_nacimiento: clientData.fecha_nacimiento || null,
+            genero: clientData.genero || null,
+            ocupacion: clientData.ocupacion || null,
+            experiencia_ejercicio: clientData.experiencia_ejercicio === 'true',
+            contacto_emergencia: clientData.contacto_emergencia || null,
+            telefono_emergencia: clientData.telefono_emergencia || null,
+            alergias: clientData.alergias || null,
+            condiciones_medicas: clientData.condiciones_medicas || null,
+            restricciones_medicas: clientData.restricciones_medicas || null,
+            membresia_tipo: clientData.membresia_tipo,
+            estado: clientData.estado,
+            fecha_ingreso: clientData.fecha_ingreso || new Date().toISOString().split('T')[0],
+            proximo_pago: clientData.proximo_pago || calculateNextPayment(clientData.membresia_tipo),
+            observaciones: clientData.observaciones || null
+        };
+
+        console.log('🎯 Datos preparados para Supabase:', clientInfo);
 
         let savedClient;
         if (isEditing && clientId) {
