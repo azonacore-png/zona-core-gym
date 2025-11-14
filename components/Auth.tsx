@@ -1,17 +1,17 @@
-import { supabase } from '@/lib/supabase'
 import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export default function Auth() {
   const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
 
   const handleLogin = async () => {
-    setLoading(true)
     const { error } = await supabase.auth.signInWithOtp({ email })
     if (error) alert(error.message)
-    else alert('Revisa tu correo (incluye spam)')
-    setLoading(false)
+    else setSent(true)
   }
+
+  if (sent) return <p className="text-green-600">Revisa tu correo (incluye spam) y vuelve a esta pestaña.</p>
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -25,10 +25,9 @@ export default function Auth() {
         />
         <button
           onClick={handleLogin}
-          disabled={loading}
-          className="w-full bg-[#FF7A3C] text-white py-2 rounded disabled:opacity-50"
+          className="w-full bg-[#FF7A3C] text-white py-2 rounded"
         >
-          {loading ? 'Enviando...' : 'Enviar enlace mágico'}
+          Enviar enlace mágico
         </button>
       </div>
     </div>
