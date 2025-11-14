@@ -22,12 +22,12 @@ export default function LoginPage() {
   }, [router])
 
   // ---- ENVÍO DE MAGIC LINK ----
-  const handleLogin = async () => {
+const handleLogin = async () => {
   if (!email.includes('@')) {
     alert('Escribe un email con @')
     return
   }
-  const redirectTo = `${window.location.origin}/` // Redirige a la raíz de tu app
+  const redirectTo = 'https://azonacore-png.github.io/zona-core-gym/'
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
@@ -37,6 +37,7 @@ export default function LoginPage() {
   if (error) alert(error.message)
   else setSent(true)
 }
+
 
 
   if (sent) return (
