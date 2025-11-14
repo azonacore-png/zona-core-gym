@@ -24,23 +24,32 @@ export default function ClassBooker({ userEmail }: { userEmail: string }) {
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-2">Reservar Clase</h2>
-      <ul className="bg-white rounded shadow divide-y">
-        {classes.map((c) => (
-          <li key={c.id} className="p-3 flex justify-between items-center">
-            <div>
-              <p className="font-semibold">{c.name}</p>
-              <p className="text-sm text-gray-600">{new Date(c.scheduled_at).toLocaleString()} – {c.instructors.full_name}</p>
-            </div>
-            {booked.includes(c.id) ? (
-              <span className="text-green-600 text-sm">Reservado</span>
-            ) : (
-              <button onClick={() => book(c.id)} className="bg-[#FF7A3C] text-white px-3 py-1 rounded text-sm">Reservar</button>
-            )}
-          </li>
-        ))}
-      </ul>
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-bold text-gray-700 mb-4">Reservar Clase</h2>
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <ul className="divide-y divide-gray-200">
+          {classes.map((c) => (
+            <li key={c.id} className="py-4 flex justify-between items-center">
+              <div>
+                <p className="font-medium">{c.name}</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(c.scheduled_at).toLocaleString()} – {c.instructors.full_name}
+                </p>
+              </div>
+              {booked.includes(c.id) ? (
+                <span className="text-green-600 text-sm font-medium">Reservado</span>
+              ) : (
+                <button
+                  onClick={() => book(c.id)}
+                  className="bg-[#FF7A3C] text-white px-3 py-1 rounded-lg text-sm hover:bg-[#e66a2b] transition-colors"
+                >
+                  Reservar
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
