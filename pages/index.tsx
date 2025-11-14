@@ -1,3 +1,4 @@
+// pages/index.tsx
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabase'
@@ -14,8 +15,8 @@ export default function Home() {
     if (access && refresh) {
       supabase.auth.setSession({ access_token: access, refresh_token: refresh })
         .then(() => {
-          // Redirige a donde quieras después de autenticar
-          router.replace('/admin') // o '/user', '/instructor', etc.
+          // Redirige según el rol del usuario (ejemplo: '/admin')
+          router.replace('/admin')
         })
         .catch(() => alert('Enlace inválido o expirado'))
     }
@@ -23,5 +24,6 @@ export default function Home() {
 
   return (
     // Tu contenido de la página de inicio
+    <div>Bienvenido a ZONA CORE</div>
   )
 }
