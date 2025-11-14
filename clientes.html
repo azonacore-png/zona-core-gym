@@ -852,42 +852,41 @@
                 observaciones: clientData.observaciones || null
             };
 
-            console.log('🎯 Datos preparados para Supabase:', clientInfo);
+                    console.log('🎯 Datos preparados para Supabase:', clientInfo);
 
-            let savedClient;
-            if (isEditing && clientId) {
-                console.log('✏️ Editando cliente existente...');
-                savedClient = await ClientesService.actualizarCliente(clientId, clientInfo);
-                showNotification('Cliente actualizado exitosamente!', 'success');
-            } else {
-                console.log('🆕 Creando nuevo cliente...');
-                savedClient = await ClientesService.crearCliente(clientInfo);
-                showNotification('Cliente agregado exitosamente!', 'success');
-            }
-            
-            console.log('✅ Operación completada:', savedClient);
-            
-            // Recargar lista de clientes
-            await loadClients();
-            closeNewClientModal();
-            
-        } catch (error) {
-            console.error('❌ ERROR DETALLADO:', error);
-            console.error('📄 Stack trace:', error.stack);
-            showNotification('Error: ' + error.message, 'error');
-
+        let savedClient;
+        if (isEditing && clientId) {
+            console.log('✏️ Editando cliente existente...');
+            savedClient = await ClientesService.actualizarCliente(clientId, clientInfo);
+            showNotification('Cliente actualizado exitosamente!', 'success');
+        } else {
+            console.log('🆕 Creando nuevo cliente...');
+            savedClient = await ClientesService.crearCliente(clientInfo);
+            showNotification('Cliente agregado exitosamente!', 'success');
+        }
+        
+        console.log('✅ Operación completada:', savedClient);
+        
+        // Recargar lista de clientes
+        await loadClients();
+        closeNewClientModal();
+        
+    } catch (error) {
+        console.error('❌ ERROR DETALLADO:', error);
+        console.error('📄 Stack trace:', error.stack);
+        
         // Manejar error específico de duplicado de email
         if (error.message.includes('duplicate key value violates unique constraint "clientes_email_key"')) {
             showNotification('Error: Ya existe un cliente con ese email. Use un email diferente.', 'error');
         } else {
             showNotification('Error: ' + error.message, 'error');
-            } 
-        } finally {
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
-            console.log('=== FINALIZADO ===');
         }
-        });
+    } finally {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+        console.log('=== FINALIZADO ===');
+    }
+});
 
     // CORREGIR también la función editClient para asegurar que el ID se establezca correctamente
     async function editClient(clientId) {
