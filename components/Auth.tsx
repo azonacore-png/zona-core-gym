@@ -6,6 +6,7 @@ export default function Auth() {
   const [sent, setSent] = useState(false)
 
   const handleLogin = async () => {
+    console.log('Botón pulsado', email) // ← línea nueva
     const { error } = await supabase.auth.signInWithOtp({ email })
     if (error) alert(error.message)
     else setSent(true)
