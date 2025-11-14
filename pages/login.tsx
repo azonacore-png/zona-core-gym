@@ -39,7 +39,12 @@ export default function LoginPage() {
 }
 
 
-  if (sent) return <p className="text-center p-6">Revisa tu correo (incluye spam) y <b>vuelve a esta pestaña</b>.</p>
+  if (sent) return (
+  <p className="text-center p-6">
+    Revisa tu correo (incluye spam) y <b>vuelve a esta pestaña</b> después de hacer clic en el enlace.
+  </p>
+)
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
