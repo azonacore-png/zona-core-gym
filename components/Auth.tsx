@@ -5,11 +5,14 @@ export default function Auth() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
 
-  const handleLogin = async () => {
-    console.log('Botón pulsado', email) // ← línea nueva
-    const { error } = await supabase.auth.signInWithOtp({ email })
-    if (error) alert(error.message)
-    else setSent(true)
+const handleLogin = async () => {
+  if (!email.includes('@')) {   // ← única comprobación mínima
+    alert('Escribe un email con @')
+    return
+  }
+  const { error } = await supabase.auth.signInWithOtp({ email })
+  if (error) alert(error.message)
+  else setSent(true)
   }
 
   if (sent) return <p className="text-green-600">Revisa tu correo (incluye spam) y vuelve a esta pestaña.</p>
