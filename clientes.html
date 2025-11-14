@@ -881,13 +881,13 @@
             showNotification('Error: Ya existe un cliente con ese email. Use un email diferente.', 'error');
         } else {
             showNotification('Error: ' + error.message, 'error');
-            
+            } 
         } finally {
             submitButton.innerHTML = originalText;
             submitButton.disabled = false;
             console.log('=== FINALIZADO ===');
         }
-    });
+        });
 
     // CORREGIR también la función editClient para asegurar que el ID se establezca correctamente
     async function editClient(clientId) {
