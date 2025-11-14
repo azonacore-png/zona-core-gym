@@ -19,12 +19,21 @@ export default function AdminDashboard() {
   }, [])
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-[#2A5B8A] mb-4">Dashboard Admin</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded shadow"><p className="text-sm text-gray-600">Clientes</p><p className="text-2xl font-bold">{stats.totalClients}</p></div>
-        <div className="bg-white p-4 rounded shadow"><p className="text-sm text-gray-600">Ingresos totales</p><p className="text-2xl font-bold">${stats.totalIncome}</p></div>
-        <div className="bg-white p-4 rounded shadow"><p className="text-sm text-gray-600">Ingreso mes pasado</p><p className="text-2xl font-bold">${stats.lastMonthIncome}</p></div>
+    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+      <h2 className="text-2xl font-bold text-[#2A5B8A] mb-6">Dashboard Admin</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-blue-50 p-6 rounded-lg shadow-sm">
+          <p className="text-gray-600 text-sm">Clientes registrados</p>
+          <p className="text-3xl font-bold text-blue-600 mt-2">{stats.totalClients || 0}</p>
+        </div>
+        <div className="bg-green-50 p-6 rounded-lg shadow-sm">
+          <p className="text-gray-600 text-sm">Ingresos totales</p>
+          <p className="text-3xl font-bold text-green-600 mt-2">${stats.totalIncome || 0}</p>
+        </div>
+        <div className="bg-yellow-50 p-6 rounded-lg shadow-sm">
+          <p className="text-gray-600 text-sm">Ingreso mes pasado</p>
+          <p className="text-3xl font-bold text-yellow-600 mt-2">${stats.lastMonthIncome || 0}</p>
+        </div>
       </div>
     </div>
   )
