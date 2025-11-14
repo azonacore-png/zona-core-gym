@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-      - run: npm ci  # Usa `npm ci` en lugar de `npm install` para una instalación limpia basada en package-lock.json
+      - run: npm install  # Usa `npm ci` en lugar de `npm install` para una instalación limpia basada en package-lock.json
       - run: npm run build
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
