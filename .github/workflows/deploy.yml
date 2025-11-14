@@ -1,9 +1,8 @@
+# .github/workflows/deploy.yml
 name: Deploy to GitHub Pages
-
 on:
   push:
     branches: [main]
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,7 +12,7 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-      - run: npm install
+      - run: npm ci  # Usa `npm ci` en lugar de `npm install` para una instalación limpia basada en package-lock.json
       - run: npm run build
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
