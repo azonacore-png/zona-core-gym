@@ -23,10 +23,21 @@ export default function LoginPage() {
 
   // ---- ENVÍO DE MAGIC LINK ----
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOtp({ email })
-    if (error) alert(error.message)
-    else setSent(true)
+  if (!email.includes('@')) {
+    alert('Escribe un email con @')
+    return
   }
+  const redirectTo = `${window.location.origin}/` // Redirige a la raíz de tu app
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectTo,
+    },
+  })
+  if (error) alert(error.message)
+  else setSent(true)
+}
+
 
   if (sent) return <p className="text-center p-6">Revisa tu correo (incluye spam) y <b>vuelve a esta pestaña</b>.</p>
 
