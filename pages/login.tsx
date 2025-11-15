@@ -6,6 +6,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [preview, setPreview] = useState<'admin' | 'user' | 'instructor'>('user')
+  const BASE_PATH = '/zona-core-gym' // ← para GitHub Pages
   const router = useRouter()
 
   // Verifica token en URL
