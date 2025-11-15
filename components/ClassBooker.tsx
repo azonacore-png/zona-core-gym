@@ -1,27 +1,42 @@
 import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
+import { useUser } from '@/lib/hooks' // ← hook para obtener usuario autenticado
 
-export default function ClassBooker({ userEmail }: { userEmail: string }) {
+export default function ClassBooker() {
+  const user = useUser()
   const [classes, setClasses] = useState<any[]>([])
   const [booked, setBooked] = useState<string[]>([])
 
-  const load = async () => {
-    const { data: c } = await supabase.from('classes').select('*, instructors(full_name)')
-    setClasses(c || [])
-    const { data: u } = await supabase.from('users').select('id').eq('email', userEmail).single()
-    if (!u) return
-    const { data: b } = await supabase.from('class_bookings').select('class_id').eq('user_id', u.id)
-    setBooked((b || []).map((x: any) => x.class_id))
-  }
+  useEffect(() => {
+    if (!user) return
 
-  useEffect(() => { load() }, [userEmail])
+    // 1. Cargar clases
+    supabase
+      .from('classes')
+      .select('*, instructors(full_name)')
+      .then(({ data }) => setClasses(data || []))
+
+    // 2. Cargar reservas del usuario autenticado (por ID)
+    supabase
+      .from('class_bookings')
+      .select('class_id')
+      .eq('user_id', user.id)
+      .then(({ data }) => setBooked((data || []).map((x: any) => x.class_id)))
+  }, [user])
 
   const book = async (classId: string) => {
-    const { data: u } = await supabase.from('users').select('id').eq('email', userEmail).single()
-    if (!u) return
-    await supabase.from('class_bookings').insert([{ user_id: u.id, class_id: classId }])
-    load()
+    if (!user) return
+
+    // Reservar usando ID único
+    await supabase
+      .from('class_bookings')
+      .insert([{ user_id: user.id, class_id: classId }])
+
+    // Actualizar lista local
+    setBooked([...booked, classId])
   }
+
+  if (!user) return <div className="p-6">Cargando usuario...</div>
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
