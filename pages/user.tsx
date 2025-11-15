@@ -15,7 +15,7 @@ export default function UserPage() {
       + Registrar nuevas medidas
     </a>
   </div>
-      <UserProgress userEmail={user.email} />
+      <UserProgress />
     </Layout>
   )
 }
