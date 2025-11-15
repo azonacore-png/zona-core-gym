@@ -10,32 +10,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut()
-    router.push('/login')
+    router.push('/login/')
   }
 
   if (!user || role === 'loading') return <div className="p-4 text-center">Cargando...</div>
 
-  const links =
-    role === 'admin'
-      ? [
-          { label: 'Dashboard', href: '/admin' },
-          { label: 'Clientes', href: '/admin/clientes' },
-          { label: 'Instructores', href: '/admin/instructores' },
-          { label: 'Finanzas', href: '/admin/finanzas' },
-          { label: 'Clases', href: '/admin/clases' },
-          { label: 'Ejercicios', href: '/admin/ejercicios' },
-        ]
-      : role === 'instructor'
-      ? [
-          { label: 'Mis Clases', href: '/instructor' },
-        ]
-      : [
-          { label: 'Mi Progreso', href: '/user' },
-          { label: 'Reservar Clase', href: '/user/reservar' },
-        ]
+  // Menús por rol
+  const menus = {
+    admin: [
+      { label: 'Dashboard', href: '/admin/' },
+      { label: 'Clientes', href: '/admin/clientes/' },
+      { label: 'Instructores', href: '/admin/instructores/' },
+      { label: 'Finanzas', href: '/admin/finanzas/' },
+      { label: 'Clases', href: '/admin/clases/' },
+      { label: 'Ejercicios', href: '/admin/ejercicios/' },
+      { label: 'Mi Perfil', href: '/admin/perfil/' },
+    ],
+    instructor: [
+      { label: 'Mis Clases', href: '/instructor/' },
+      { label: 'Mi Perfil', href: '/instructor/perfil/' },
+    ],
+    client: [
+      { label: 'Mi Progreso', href: '/user/' },
+      { label: 'Reservar Clase', href: '/user/reservar/' },
+      { label: 'Mi Perfil', href: '/user/perfil/' },
+    ],
+  }
+
+  const links = menus[role] || menus.client
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
       <aside className="w-64 bg-[#2A5B8A] text-white p-4 flex flex-col">
         <h1 className="text-xl font-bold mb-8">ZONA CORE</h1>
         <nav className="space-y-2 flex-1">
@@ -58,9 +64,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           Cerrar sesión
         </button>
       </aside>
-      <main className="flex-1 p-6">
-        {children}
-      </main>
+
+      {/* Contenido principal */}
+      <main className="flex-1 p-6">{children}</main>
     </div>
   )
 }
