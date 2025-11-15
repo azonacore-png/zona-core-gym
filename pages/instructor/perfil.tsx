@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
 import UploadAvatar from '@/components/UploadAvatar'
 
-export default function AdminPerfilPage() {
+export default function InstructorPerfilPage() {
   const user = useUser()
   const role = useRole(user?.email)
   const [profile, setProfile] = useState<any>(null)
