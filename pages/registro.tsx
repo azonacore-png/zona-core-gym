@@ -11,7 +11,7 @@ export default function RegistroPage() {
     phone: '',
     birth_date: '',
     sex: 'F',
-    id_type: 'DNI',
+    id_type: 'CC',
     id_number: '',
     role: 'client',
   })
