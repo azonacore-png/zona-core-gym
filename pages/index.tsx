@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 export default function Home() {
   const router = useRouter()
-  const basePath = router.basePath || '/zona-core-gym' // ← para GitHub Pages
+  const BASE_PATH = '/zona-core-gym' // ← para GitHub Pages
 
   useEffect(() => {
     const hash = window.location.hash.substring(1)
