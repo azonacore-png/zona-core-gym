@@ -19,7 +19,7 @@ export default function AdminPerfilPage() {
     setProfile({ ...profile, avatar_url: url })
   }
 
-  if (role !== 'usuario') return <div className="p-6">No autorizado</div>
+  if (role !== 'client') return <div className="p-6">No autorizado</div>
   if (!profile) return <p className="p-6">Cargando...</p>
 
   return (
