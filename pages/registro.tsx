@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link' // ← importación faltante
 
 export default function RegistroPage() {
   const router = useRouter()
@@ -9,53 +10,54 @@ export default function RegistroPage() {
     full_name: '',
     phone: '',
     birth_date: '',
-    sex: 'Selecciona',
-    id_type: 'CC',
+    sex: 'F',
+    id_type: 'DNI',
     id_number: '',
     role: 'client',
   })
   const [sent, setSent] = useState(false)
 
   const handleRegister = async () => {
-    if (!form.email.includes('@') || !form.full_name) {
-      alert('Completa email y nombre')
+    if (!form.email.includes('@') || !form.full_name || !form.id_number) {
+      alert('Completa email, nombre y número de identificación')
       return
     }
 
-    // Verificar que no exista el número
+    // Verificar que el número no exista
     const { data: exists } = await supabase
       .from('users')
       .select('id')
       .eq('id_number', form.id_number)
       .single()
-    
+
     if (exists) {
       alert('Ese número de identificación ya está registrado')
       return
     }
 
-    // 1. Crear usuario en Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Crear usuario en Supabase Auth
+    const { error } = await supabase.auth.signUp({
       email: form.email,
-      password: Math.random().toString(36), // contraseña aleatoria (no se usará)
+      password: Math.random().toString(36), // contraseña aleatoria (no se usa)
       options: {
         data: {
           full_name: form.full_name,
           phone: form.phone,
           birth_date: form.birth_date,
           sex: form.sex,
+          id_type: form.id_type,
+          id_number: form.id_number,
           role: form.role,
         },
         emailRedirectTo: `${window.location.origin}/login/`,
       },
     })
 
-    if (authError) {
-      alert(authError.message)
+    if (error) {
+      alert(error.message)
       return
     }
 
-    // 2. Crear registro en tabla users (opcional, ya lo hace el trigger)
     setSent(true)
   }
 
@@ -86,7 +88,7 @@ export default function RegistroPage() {
             onChange={(e) => setForm({ ...form, full_name: e.target.value })}
           />
           <input
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7A6C] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7A3C] focus:border-transparent"
             placeholder="Teléfono"
             type="tel"
             value={form.phone}
@@ -110,7 +112,7 @@ export default function RegistroPage() {
           </select>
 
           <select
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7A3C]"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7A3C] focus:border-transparent"
             value={form.id_type}
             onChange={(e) => setForm({ ...form, id_type: e.target.value })}
           >
@@ -121,9 +123,9 @@ export default function RegistroPage() {
             <option value="TI">Tarjeta de Identidad</option>
             <option value="OTRO">Otro</option>
           </select>
-          
+
           <input
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7A3C]"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF7A3C] focus:border-transparent"
             placeholder="Número de identificación"
             required
             value={form.id_number}
