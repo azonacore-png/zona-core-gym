@@ -34,6 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       { label: 'Mi Progreso', href: '/user/' },
       { label: 'Reservar Clase', href: '/user/reservar/' },
       { label: 'Mi Perfil', href: '/user/perfil/' },
+      { label: 'Crear cuenta', href: '/registro/' }, // ← nuevo
     ],
   }
 
