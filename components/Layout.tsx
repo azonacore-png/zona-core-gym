@@ -24,6 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       { label: 'Finanzas', href: '/admin/finanzas/' },
       { label: 'Clases', href: '/admin/clases/' },
       { label: 'Ejercicios', href: '/admin/ejercicios/' },
+      { label: 'Crear Usuarios', href: '/admin/usuarios/' },
       { label: 'Mi Perfil', href: '/admin/perfil/' },
     ],
     instructor: [
