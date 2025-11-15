@@ -16,10 +16,13 @@ export default function LoginPage() {
     const refresh = params.get('refresh_token')
     if (access && refresh) {
       supabase.auth.setSession({ access_token: access, refresh_token: refresh })
-        .then(() => router.replace('/'))
-        .catch(() => alert('Enlace inválido o expirado'))
+      .then(() => {
+        // ✅ CORREGIDO: ruta absoluta + .html
+        window.location.replace('/zona-core-gym/admin.html')
+      })
+      .catch(() => alert('Enlace inválido o expirado'))
     }
-  }, [router])
+  }, [])
 
   const handleLogin = async () => {
     if (!email.includes('@')) {
@@ -28,12 +31,13 @@ export default function LoginPage() {
     }
   // ✅ misma ventana
   const redirectTo = `${window.location.origin}${window.location.pathname}`
+  // pages/login.tsx
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo, // ← misma URL
+      emailRedirectTo: `${window.location.origin}${window.location.pathname}`, // ← ya está bien
     },
-    })
+  })
     if (error) alert(error.message)
     else setSent(true)
   }
