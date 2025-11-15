@@ -16,31 +16,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (!user || role === 'loading') return <div className="p-4 text-center">Cargando...</div>
 
   // Menús por rol
-  const menus = {
-    admin: [
-      { label: 'Dashboard', href: '/admin/' },
-      { label: 'Clientes', href: '/admin/clientes/' },
-      { label: 'Instructores', href: '/admin/instructores/' },
-      { label: 'Finanzas', href: '/admin/finanzas/' },
-      { label: 'Clases', href: '/admin/clases/' },
-      { label: 'Ejercicios', href: '/admin/ejercicios/' },
-      { label: 'Progresos', href: '/admin/progresos/' },
-      { label: 'Reportes', href: '/admin/reportes/' },
-      { label: 'Configuración', href: '/admin/configuracion/' },
-      { label: 'Crear Usuarios', href: '/admin/usuarios/' },
-      { label: 'Mi Perfil', href: '/admin/perfil/' },
-    ],
-    instructor: [
-      { label: 'Mis Clases', href: '/instructor/' },
-      { label: 'Mi Perfil', href: '/instructor/perfil/' },
-    ],
-    client: [
-      { label: 'Mi Progreso', href: '/user/' },
-      { label: 'Reservar Clase', href: '/user/reservar/' },
-      { label: 'Mi Perfil', href: '/user/perfil/' },
-      { label: 'Crear cuenta', href: '/registro/' }, // ← nuevo
-    ],
-  }
+const menus = {
+  admin: [
+    { label: 'Dashboard', href: '/admin/' },
+    { label: 'Clientes', href: '/admin/clientes/' },
+    { label: 'Instructores', href: '/admin/instructores/' },
+    { label: 'Finanzas', href: '/admin/finanzas/' },
+    { label: 'Clases', href: '/admin/clases/' },
+    { label: 'Ejercicios', href: '/admin/ejercicios/' },
+    { label: 'Progresos', href: '/admin/progresos/' },
+    { label: 'Reportes', href: '/admin/reportes/' },
+    { label: 'Configuración', href: '/admin/configuracion/' },
+    { label: 'Crear Usuarios', href: '/admin/usuarios/' },
+    { label: 'Mi Perfil', href: '/admin/perfil/' },
+  ],
+  instructor: [
+    { label: 'Mis Clases', href: '/instructor/' },
+    { label: 'Mi Perfil', href: '/instructor/perfil/' },
+  ],
+  client: [
+    { label: 'Mi Progreso', href: '/user/' },
+    { label: 'Reservar Clase', href: '/user/reservar/' },
+    { label: 'Mi Perfil', href: '/user/perfil/' },
+  ],
+}
 
   const links = menus[role] || menus.client
 
