@@ -29,7 +29,7 @@ return (
       <p className="text-xl mb-8">Gestión integral para gimnasios femeninos</p>
       <div className="flex gap-4 justify-center">
         <a
-          href="/login"
+          href="/login/"
           className="bg-white text-[#2A5B8A] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
         >
           Iniciar sesión
