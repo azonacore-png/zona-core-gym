@@ -7,21 +7,22 @@ export default function Home() {
   const router = useRouter()
   const BASE_PATH = '/zona-core-gym' // ← para GitHub Pages
 
-  useEffect(() => {
-    const hash = window.location.hash.substring(1)
-    const params = new URLSearchParams(hash)
-    const access = params.get('access_token')
-    const refresh = params.get('refresh_token')
+// pages/index.tsx
+useEffect(() => {
+  const hash = window.location.hash.substring(1)
+  const params = new URLSearchParams(hash)
+  const access = params.get('access_token')
+  const refresh = params.get('refresh_token')
 
-    if (access && refresh) {
-      supabase.auth.setSession({ access_token: access, refresh_token: refresh })
-        .then(() => {
-          // Redirige según el rol del usuario (ejemplo: '/admin')
-          router.replace('/admin')
-        })
-        .catch(() => alert('Enlace inválido o expirado'))
-    }
-  }, [router])
+  if (access && refresh) {
+    supabase.auth.setSession({ access_token: access, refresh_token: refresh })
+      .then(() => {
+        // ✅ CORREGIDO: ruta absoluta + .html
+        window.location.replace('/zona-core-gym/admin.html')
+      })
+      .catch(() => alert('Enlace inválido o expirado'))
+  }
+}, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2A5B8A] to-[#FF7A3C] flex items-center justify-center p-4 text-white">
