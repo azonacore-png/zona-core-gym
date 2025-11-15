@@ -7,7 +7,7 @@ export default function ReservarPage() {
   if (!user) return null
   return (
     <Layout>
-      <ClassBooker userEmail={user.email} />
+      <ClassBooker />
     </Layout>
   )
 }
