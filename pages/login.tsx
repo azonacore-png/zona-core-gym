@@ -18,7 +18,7 @@ export default function LoginPage() {
       supabase.auth.setSession({ access_token: access, refresh_token: refresh })
       .then(() => {
         // ✅ CORREGIDO: ruta absoluta + .html
-        window.location.replace('/zona-core-gym/admin.html')
+        window.location.replace(`${BASE_PATH}/admin`)
       })
       .catch(() => alert('Enlace inválido o expirado'))
     }
