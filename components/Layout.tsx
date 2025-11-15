@@ -43,6 +43,12 @@ const menus = {
 
   const links = menus[role] || menus.client
 
+  const signOut = async () => {
+  await supabase.auth.signOut()
+  // ✅ Forzar recarga limpia (GitHub Pages safe)
+  window.location.href = '/zona-core-gym/login/'
+}
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -67,6 +73,8 @@ const menus = {
         >
           Cerrar sesión
         </button>
+
+        
       </aside>
 
       {/* Contenido principal */}
