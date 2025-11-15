@@ -9,13 +9,23 @@ export default function InstructorPage() {
   const [classes, setClasses] = useState<any[]>([])
 
   useEffect(() => {
-    if (!user) return
+    if (!user) {
+      window.location.replace('/zona-core-gym/login.html')
+      return
+    }
+
     supabase
       .from('classes')
       .select('*, class_bookings(*, users(full_name))')
       .eq('instructor_id', user.id)
       .then(({ data }) => setClasses(data || []))
   }, [user])
+
+  useEffect(() => {
+    if (role === 'instructor') {
+      window.location.replace('/zona-core-gym/instructor.html')
+    }
+  }, [role])
 
   if (role !== 'instructor') return <div className="p-6">No autorizado</div>
 
