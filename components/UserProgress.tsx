@@ -1,15 +1,23 @@
 import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
+import { useUser } from '@/lib/hooks' // ← importa el hook
 
-export default function UserProgress({ userEmail }: { userEmail: string }) {
+export default function UserProgress() {
+  const user = useUser()
   const [rows, setRows] = useState<any[]>([])
 
   useEffect(() => {
-    supabase.from('users').select('id').eq('email', userEmail).single().then(({ data: u }) => {
-      if (!u) return
-      supabase.from('progress_tracking').select('*').eq('user_id', u.id).order('date', { ascending: false }).then((r) => setRows(r.data || []))
-    })
-  }, [userEmail])
+    if (!user) return
+    // ✅ usa user.id directamente
+    supabase
+      .from('progress_tracking')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false })
+      .then((r) => setRows(r.data || []))
+  }, [user])
+
+  if (!user) return <div className="p-6">Cargando usuario...</div>
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
