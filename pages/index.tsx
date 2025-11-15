@@ -14,8 +14,8 @@ export default function Home() {
     if (access && refresh) {
       supabase.auth.setSession({ access_token: access, refresh_token: refresh })
         .then(() => {
-          // ✅ CORREGIDO: ruta absoluta + .html
-          window.location.replace(`${BASE_PATH}/admin`)
+          // ✅ CORREGIDO: ruta absoluta 
+           window.location.hash = ''
         })
         .catch(() => alert('Enlace inválido o expirado'))
     }
