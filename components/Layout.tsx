@@ -8,11 +8,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const role = useRole(user?.email)
   const router = useRouter()
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/login/')
-  }
-
   if (!user || role === 'loading') return <div className="p-4 text-center">Cargando...</div>
 
   // Menús por rol
