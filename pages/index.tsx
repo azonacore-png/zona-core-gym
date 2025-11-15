@@ -28,7 +28,7 @@ export default function Home() {
         <p className="text-xl mb-8">Gestión integral para gimnasios femeninos</p>
         <div className="flex gap-4 justify-center">
           <a
-            href={`${BASE_PATH}/login.html`} // ← .html para GitHub Pages
+            href={`${BASE_PATH}/login/`} // ← para GitHub Pages
             className="bg-white text-[#2A5B8A] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
           >
             Iniciar sesión
