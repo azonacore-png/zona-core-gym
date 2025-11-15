@@ -26,10 +26,13 @@ export default function LoginPage() {
       alert('Escribe un email con @')
       return
     }
-    const redirectTo = 'https://azonacore-png.github.io/zona-core-gym/'
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo },
+  // ✅ misma ventana
+  const redirectTo = `${window.location.origin}${window.location.pathname}`
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: redirectTo, // ← misma URL
+    },
     })
     if (error) alert(error.message)
     else setSent(true)
