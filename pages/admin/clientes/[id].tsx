@@ -48,18 +48,23 @@ export default function ClienteDetallePage() {
               <p><strong>Email:</strong> {client.email}</p>
               <p><strong>Teléfono:</strong> {client.phone}</p>
               <p><strong>Fecha de nacimiento:</strong> {client.birth_date}</p>
+              <p><strong>Sexo:</strong> {client.sex}</p>
+              <p><strong>Cédula:</strong> {client.id_number}</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-800 mb-2">Membresía</h3>
               <p><strong>Tipo:</strong> {client.membership_type || 'Sin definir'}</p>
               <p><strong>Estado:</strong> {client.status || 'Activo'}</p>
+              <p><strong>Fecha de ingreso:</strong> {new Date(client.created_at).toLocaleDateString()}</p>
             </div>
           </div>
-
+          
           <div className="mt-8">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Progreso</h3>
-            {/* Aquí iría <ClienteProgreso userId={id} /> */}
-            <p className="text-gray-600">Próximamente: gráficas de peso, medidas, etc.</p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Información adicional</h3>
+            <p><strong>Contacto de emergencia:</strong> {client.emergency_name} – {client.emergency_phone}</p>
+            <p><strong>Alergias:</strong> {client.allergies || 'Ninguna'}</p>
+            <p><strong>Condiciones médicas:</strong> {client.medical_conditions || 'Ninguna'}</p>
+            <p><strong>¿Ha hecho ejercicio antes?</strong> {client.has_experience ? 'Sí' : 'No'}</p>
           </div>
         </div>
       </div>
