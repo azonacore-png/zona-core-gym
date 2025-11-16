@@ -15,7 +15,26 @@ export default function LoginPage() {
     const refresh = params.get('refresh_token')
     if (access && refresh) {
       supabase.auth.setSession({ access_token: access, refresh_token: refresh })
-        .then(() => window.location.replace(`${BASE_PATH}/admin/`))
+        .then(async () => {
+          const { data: userData } = await supabase.auth.getUser()
+          if (!userData.user) return
+  
+          const { data: roleData } = await supabase
+            .from('users')
+            .select('role')
+            .eq('email', userData.user.email)
+            .single()
+  
+          const role = roleData?.role || 'client'
+  
+          if (role === 'admin') {
+            window.location.replace(`${BASE_PATH}/admin/`)
+          } else if (role === 'instructor') {
+            window.location.replace(`${BASE_PATH}/instructor/`)
+          } else {
+            window.location.replace(`${BASE_PATH}/user/`)
+          }
+        })
         .catch(() => alert('Enlace inválido o expirado'))
     }
   }, [])
