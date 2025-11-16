@@ -1,0 +1,9 @@
+{
+  "name": "ZONA CORE",
+  "short_name": "ZONA",
+  "start_url": "/zona-core-gym/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2A5B8A",
+  "icons": []
+}
