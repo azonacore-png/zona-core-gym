@@ -5,21 +5,39 @@ import { supabase } from '@/lib/supabase'
 export default function Home() {
   const BASE_PATH = '/zona-core-gym' // ← para GitHub Pages
 
-  useEffect(() => {
-    const hash = window.location.hash.substring(1)
-    const params = new URLSearchParams(hash)
-    const access = params.get('access_token')
-    const refresh = params.get('refresh_token')
+useEffect(() => {
+  const hash = window.location.hash.substring(1)
+  const params = new URLSearchParams(hash)
+  const access = params.get('access_token')
+  const refresh = params.get('refresh_token')
 
-    if (access && refresh) {
-      supabase.auth.setSession({ access_token: access, refresh_token: refresh })
-        .then(() => {
-          // ✅ CORREGIDO: ruta absoluta 
-           window.location.hash = ''
-        })
-        .catch(() => alert('Enlace inválido o expirado'))
-    }
-  }, [])
+  if (access && refresh) {
+    supabase.auth.setSession({ access_token: access, refresh_token: refresh })
+      .then(async () => {
+        // ✅ Obtenemos el rol del usuario
+        const { data: userData } = await supabase.auth.getUser()
+        if (!userData.user) return
+
+        const { data: roleData } = await supabase
+          .from('users')
+          .select('role')
+          .eq('email', userData.user.email)
+          .single()
+
+        const role = roleData?.role || 'client'
+
+        // ✅ Redirige según rol
+        if (role === 'admin') {
+          window.location.replace(`${BASE_PATH}/admin/`)
+        } else if (role === 'instructor') {
+          window.location.replace(`${BASE_PATH}/instructor/`)
+        } else {
+          window.location.replace(`${BASE_PATH}/user/`)
+        }
+      })
+      .catch(() => alert('Enlace inválido o expirado'))
+  }
+}, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2A5B8A] to-[#FF7A3C] flex items-center justify-center p-4 text-white">
