@@ -19,14 +19,21 @@ export default function AdminClientes() {
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-[#2A5B8A]">Clientes</h2>
-            <button className="bg-[#FF7A3C] text-white px-4 py-2 rounded-lg hover:bg-[#e66a2b] transition">
+            <button
+              onClick={() => window.location.href = '/zona-core-gym/admin/usuarios/'}
+              className="bg-[#FF7A3C] text-white px-4 py-2 rounded-lg hover:bg-[#e66a2b] transition"
+            >
               <i className="fas fa-plus mr-2"></i>Nuevo Cliente
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {clients.map((client) => (
-              <div key={client.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+              <div
+                key={client.id}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition cursor-pointer"
+                onClick={() => window.location.href = `/zona-core-gym/admin/clientes/${client.id}/`}
+              >
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
                     {client.full_name?.split(' ').map((n: string) => n[0]).join('')}
@@ -38,8 +45,36 @@ export default function AdminClientes() {
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end space-x-2">
-                  <button className="text-blue-600 hover:underline text-sm">Ver</button>
-                  <button className="text-green-600 hover:underline text-sm">Editar</button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      window.location.href = `/zona-core-gym/admin/clientes/${client.id}/`
+                    }}
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    Ver
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      window.location.href = `/zona-core-gym/admin/clientes/${client.id}/editar/`
+                    }}
+                    className="text-green-600 hover:underline text-sm"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      if (confirm(`¿Eliminar a ${client.full_name}?`)) {
+                        await supabase.from('users').delete().eq('id', client.id)
+                        window.location.reload()
+                      }
+                    }}
+                    className="text-red-600 hover:underline text-sm"
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </div>
             ))}
